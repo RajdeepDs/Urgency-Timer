@@ -10,6 +10,8 @@ import {
   InlineStack,
   Popover,
   ColorPicker,
+  Divider,
+  Bleed,
 } from "@shopify/polaris";
 import { useState, useCallback } from "react";
 
@@ -42,6 +44,43 @@ export default function DesignTab({ onContinue }: DesignTabProps) {
   const [outsideTop, setOutsideTop] = useState("20");
   const [outsideBottom, setOutsideBottom] = useState("20");
 
+  // Typography states
+  const [titleSize, setTitleSize] = useState("28");
+  const [titleColor, setTitleColor] = useState({
+    hue: 0,
+    saturation: 0,
+    brightness: 0.13,
+    alpha: 1,
+  });
+  const [titleColorPopover, setTitleColorPopover] = useState(false);
+
+  const [subheadingSize, setSubheadingSize] = useState("16");
+  const [subheadingColor, setSubheadingColor] = useState({
+    hue: 0,
+    saturation: 0,
+    brightness: 0.13,
+    alpha: 1,
+  });
+  const [subheadingColorPopover, setSubheadingColorPopover] = useState(false);
+
+  const [timerSize, setTimerSize] = useState("40");
+  const [timerColor, setTimerColor] = useState({
+    hue: 0,
+    saturation: 0,
+    brightness: 0.13,
+    alpha: 1,
+  });
+  const [timerColorPopover, setTimerColorPopover] = useState(false);
+
+  const [legendSize, setLegendSize] = useState("14");
+  const [legendColor, setLegendColor] = useState({
+    hue: 0,
+    saturation: 0,
+    brightness: 0.44,
+    alpha: 1,
+  });
+  const [legendColorPopover, setLegendColorPopover] = useState(false);
+
   const toggleBgColorPopover = useCallback(
     () => setBgColorPopover((active) => !active),
     [],
@@ -49,6 +88,26 @@ export default function DesignTab({ onContinue }: DesignTabProps) {
 
   const toggleBorderColorPopover = useCallback(
     () => setBorderColorPopover((active) => !active),
+    [],
+  );
+
+  const toggleTitleColorPopover = useCallback(
+    () => setTitleColorPopover((active) => !active),
+    [],
+  );
+
+  const toggleSubheadingColorPopover = useCallback(
+    () => setSubheadingColorPopover((active) => !active),
+    [],
+  );
+
+  const toggleTimerColorPopover = useCallback(
+    () => setTimerColorPopover((active) => !active),
+    [],
+  );
+
+  const toggleLegendColorPopover = useCallback(
+    () => setLegendColorPopover((active) => !active),
     [],
   );
 
@@ -137,7 +196,6 @@ export default function DesignTab({ onContinue }: DesignTabProps) {
                   <ColorPicker
                     color={backgroundColor}
                     onChange={setBackgroundColor}
-                    allowAlpha
                   />
                 </Box>
               </Popover>
@@ -192,11 +250,7 @@ export default function DesignTab({ onContinue }: DesignTabProps) {
                 onClose={toggleBorderColorPopover}
               >
                 <Box padding="400">
-                  <ColorPicker
-                    color={borderColor}
-                    onChange={setBorderColor}
-                    allowAlpha
-                  />
+                  <ColorPicker color={borderColor} onChange={setBorderColor} />
                 </Box>
               </Popover>
               <Box width="100%">
@@ -256,12 +310,206 @@ export default function DesignTab({ onContinue }: DesignTabProps) {
           />
         </InlineGrid>
       </BlockStack>
+      <Bleed marginInline={"400"}>
+        <Divider />
+      </Bleed>
+      <BlockStack gap="400">
+        <Text as="h4" variant="headingSm" fontWeight="semibold">
+          Typography
+        </Text>
+        <BlockStack gap="200">
+          <Text as="p" variant="bodyMd">
+            Title size and color
+          </Text>
+          <InlineStack gap="200" blockAlign="stretch" wrap={false}>
+            <div style={{ width: "110px" }}>
+              <TextField
+                label="Title size"
+                labelHidden
+                value={titleSize}
+                onChange={setTitleSize}
+                autoComplete="off"
+                suffix="px"
+                type="number"
+              />
+            </div>
+            <Popover
+              active={titleColorPopover}
+              activator={
+                <button
+                  type="button"
+                  onClick={toggleTitleColorPopover}
+                  style={{ backgroundColor: hsbToHex(titleColor) }}
+                  className="min-h-8 min-w-11 border border-[#e1e3e5] cursor-pointer rounded-md shrink-0"
+                />
+              }
+              onClose={toggleTitleColorPopover}
+            >
+              <Box padding="400">
+                <ColorPicker color={titleColor} onChange={setTitleColor} />
+              </Box>
+            </Popover>
+            <div className="flex-1">
+              <TextField
+                label="Title color"
+                labelHidden
+                value={hsbToHex(titleColor)}
+                onChange={(value) => {
+                  // Handle hex input if needed
+                }}
+                autoComplete="off"
+              />
+            </div>
+          </InlineStack>
+        </BlockStack>
 
-      <Box paddingBlockStart="400">
-        <Button fullWidth onClick={onContinue}>
-          Continue to Placement
-        </Button>
-      </Box>
+        <BlockStack gap="200">
+          <Text as="p" variant="bodyMd">
+            Subheading size and color
+          </Text>
+          <InlineStack gap="200" blockAlign="stretch" wrap={false}>
+            <div style={{ width: "110px" }}>
+              <TextField
+                label="Subheading size"
+                labelHidden
+                value={subheadingSize}
+                onChange={setSubheadingSize}
+                autoComplete="off"
+                suffix="px"
+                type="number"
+              />
+            </div>
+            <Popover
+              active={subheadingColorPopover}
+              activator={
+                <button
+                  type="button"
+                  onClick={toggleSubheadingColorPopover}
+                  style={{ backgroundColor: hsbToHex(subheadingColor) }}
+                  className="min-h-8 min-w-11 border border-[#e1e3e5] cursor-pointer rounded-md shrink-0"
+                />
+              }
+              onClose={toggleSubheadingColorPopover}
+            >
+              <Box padding="400">
+                <ColorPicker
+                  color={subheadingColor}
+                  onChange={setSubheadingColor}
+                />
+              </Box>
+            </Popover>
+            <div className="flex-1">
+              <TextField
+                label="Subheading color"
+                labelHidden
+                value={hsbToHex(subheadingColor)}
+                onChange={(value) => {
+                  // Handle hex input if needed
+                }}
+                autoComplete="off"
+              />
+            </div>
+          </InlineStack>
+        </BlockStack>
+
+        <BlockStack gap="200">
+          <Text as="p" variant="bodyMd">
+            Timer size and color
+          </Text>
+          <InlineStack gap="200" blockAlign="stretch" wrap={false}>
+            <div style={{ width: "110px" }}>
+              <TextField
+                label="Timer size"
+                labelHidden
+                value={timerSize}
+                onChange={setTimerSize}
+                autoComplete="off"
+                suffix="px"
+                type="number"
+              />
+            </div>
+            <Popover
+              active={timerColorPopover}
+              activator={
+                <button
+                  type="button"
+                  onClick={toggleTimerColorPopover}
+                  style={{ backgroundColor: hsbToHex(timerColor) }}
+                  className="min-h-8 min-w-11 border border-[#e1e3e5] cursor-pointer rounded-md shrink-0"
+                />
+              }
+              onClose={toggleTimerColorPopover}
+            >
+              <Box padding="400">
+                <ColorPicker color={timerColor} onChange={setTimerColor} />
+              </Box>
+            </Popover>
+            <div className="flex-1">
+              <TextField
+                label="Timer color"
+                labelHidden
+                value={hsbToHex(timerColor)}
+                onChange={(value) => {
+                  // Handle hex input if needed
+                }}
+                autoComplete="off"
+              />
+            </div>
+          </InlineStack>
+        </BlockStack>
+
+        <BlockStack gap="200">
+          <Text as="p" variant="bodyMd">
+            Legend size and color
+          </Text>
+          <InlineStack gap="200" blockAlign="stretch" wrap={false}>
+            <div style={{ width: "110px" }}>
+              <TextField
+                label="Legend size"
+                labelHidden
+                value={legendSize}
+                onChange={setLegendSize}
+                autoComplete="off"
+                suffix="px"
+                type="number"
+              />
+            </div>
+            <Popover
+              active={legendColorPopover}
+              activator={
+                <button
+                  type="button"
+                  onClick={toggleLegendColorPopover}
+                  style={{ backgroundColor: hsbToHex(legendColor) }}
+                  className="min-h-8 min-w-11 border border-[#e1e3e5] cursor-pointer rounded-md shrink-0"
+                />
+              }
+              onClose={toggleLegendColorPopover}
+            >
+              <Box padding="400">
+                <ColorPicker color={legendColor} onChange={setLegendColor} />
+              </Box>
+            </Popover>
+            <div className="flex-1">
+              <TextField
+                label="Legend color"
+                labelHidden
+                value={hsbToHex(legendColor)}
+                onChange={(value) => {
+                  // Handle hex input if needed
+                }}
+                autoComplete="off"
+              />
+            </div>
+          </InlineStack>
+        </BlockStack>
+      </BlockStack>
+      <Bleed marginInline={"400"}>
+        <Divider />
+      </Bleed>
+      <Button fullWidth onClick={onContinue}>
+        Continue to Placement
+      </Button>
     </FormLayout>
   );
 }
