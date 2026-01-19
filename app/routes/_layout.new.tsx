@@ -63,8 +63,7 @@ export default function ChooseTimerPage() {
       return;
     }
     // Navigate to timer creation/configuration
-    console.log(`Selected timer: ${timerId}`);
-    navigate(`/timers/create/${timerId}`);
+    navigate(`/timer?type=${timerId}`);
   };
 
   return (
