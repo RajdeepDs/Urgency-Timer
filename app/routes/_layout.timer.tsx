@@ -1,8 +1,12 @@
 import { useSearchParams } from "@remix-run/react";
-import { Page, Text, BlockStack, Badge, Box, Tabs } from "@shopify/polaris";
+import { Page, Badge, Box, Tabs, Card, InlineGrid } from "@shopify/polaris";
 import type { LoaderFunctionArgs } from "@remix-run/node";
 import { authenticate } from "../shopify.server";
 import { useCallback, useState } from "react";
+import ContentTab from "../components/timer/ContentTab";
+import DesignTab from "../components/timer/DesignTab";
+import PlacementTab from "../components/timer/PlacementTab";
+import TimerPreview from "../components/timer/TimerPreview";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   await authenticate.admin(request);
@@ -15,11 +19,18 @@ export default function TimerConfigPage() {
   const timerType = searchParams.get("type");
 
   const [selected, setSelected] = useState(0);
+  const [timerName, setTimerName] = useState("");
+  const [title, setTitle] = useState("Hurry up!");
+  const [subheading, setSubheading] = useState("Sale ends in:");
 
   const handleTabChange = useCallback(
     (selectedTabIndex: number) => setSelected(selectedTabIndex),
     [],
   );
+
+  const handleSave = () => {
+    console.log("Saving timer...");
+  };
 
   const tabs = [
     {
@@ -42,19 +53,53 @@ export default function TimerConfigPage() {
     },
   ];
 
+  const renderTabContent = () => {
+    switch (selected) {
+      case 0:
+        return (
+          <ContentTab
+            timerName={timerName}
+            setTimerName={setTimerName}
+            title={title}
+            setTitle={setTitle}
+            subheading={subheading}
+            setSubheading={setSubheading}
+            onContinue={() => handleTabChange(1)}
+          />
+        );
+      case 1:
+        return <DesignTab onContinue={() => handleTabChange(2)} />;
+      case 2:
+        return <PlacementTab onSave={handleSave} />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <Page
       title="Timer name"
       backAction={{
         content: "Back",
-        url: "/",
+        url: "/new",
       }}
-      titleMetadata={<Badge>Not published</Badge>}
+      titleMetadata={<Badge tone="info">Not published</Badge>}
       subtitle="Timer ID: Save or Publish to show timer ID"
       primaryAction={{ content: "Publish" }}
     >
-      <Box>
-        <Tabs tabs={tabs} selected={selected} onSelect={handleTabChange}></Tabs>
+      <Box paddingBlockEnd="800">
+        <Tabs tabs={tabs} selected={selected} onSelect={handleTabChange}>
+          <Box paddingBlockStart="400">
+            <InlineGrid columns={{ xs: 1, lg: "2fr 3fr" }} gap="3200">
+              <Box>
+                <Card padding="400">{renderTabContent()}</Card>
+              </Box>
+              <Box>
+                <TimerPreview title={title} subheading={subheading} />
+              </Box>
+            </InlineGrid>
+          </Box>
+        </Tabs>
       </Box>
     </Page>
   );
