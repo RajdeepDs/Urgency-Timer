@@ -10,7 +10,7 @@ export default function TimerPreview({ title, subheading }: TimerPreviewProps) {
     <Box position="sticky" insetBlockStart="400">
       <Card>
         <BlockStack gap="400">
-          <Box background="bg-surface-secondary" padding="800" borderRadius="200">
+          <Box>
             <BlockStack gap="400" align="center">
               <Text as="h2" variant="heading2xl" alignment="center">
                 {title || "Hurry up!"}

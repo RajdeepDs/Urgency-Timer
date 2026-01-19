@@ -3,90 +3,152 @@ import {
   Text,
   Box,
   FormLayout,
-  Button,
-  Select,
   RadioButton,
-  Checkbox,
+  Link,
+  Card,
 } from "@shopify/polaris";
 import { useState } from "react";
 
-interface PlacementTabProps {
-  onSave: () => void;
-}
-
-export default function PlacementTab({ onSave }: PlacementTabProps) {
-  const [position, setPosition] = useState("below-cart");
-  const [alignment, setAlignment] = useState("center");
-  const [showOnMobile, setShowOnMobile] = useState(true);
-  const [showOnDesktop, setShowOnDesktop] = useState(true);
+export default function PlacementTab() {
+  const [productSelection, setProductSelection] = useState("all");
+  const [geolocation, setGeolocation] = useState("all-world");
 
   return (
     <FormLayout>
-      <BlockStack gap="400">
-        <Text as="h4" variant="headingSm" fontWeight="semibold">
-          Timer Placement
-        </Text>
-
-        <BlockStack gap="300">
-          <Text as="p" variant="bodyMd">
-            Position
+      <Card padding="400">
+        <BlockStack gap="400">
+          <Text as="h4" variant="headingSm" fontWeight="semibold">
+            Select Products
           </Text>
-          <RadioButton
-            label="Below add to cart button"
-            checked={position === "below-cart"}
-            id="below-cart"
-            name="position"
-            onChange={() => setPosition("below-cart")}
-          />
-          <RadioButton
-            label="Above add to cart button"
-            checked={position === "above-cart"}
-            id="above-cart"
-            name="position"
-            onChange={() => setPosition("above-cart")}
-          />
-          <RadioButton
-            label="Below product title"
-            checked={position === "below-title"}
-            id="below-title"
-            name="position"
-            onChange={() => setPosition("below-title")}
-          />
+
+          <BlockStack gap="200">
+            <RadioButton
+              label="All products"
+              checked={productSelection === "all"}
+              id="all"
+              name="productSelection"
+              onChange={() => setProductSelection("all")}
+              helpText={
+                <Link url="#" removeUnderline>
+                  Exclude specific products
+                </Link>
+              }
+            />
+
+            <RadioButton
+              label="Specific products"
+              checked={productSelection === "specific"}
+              id="specific"
+              name="productSelection"
+              onChange={() => setProductSelection("specific")}
+            />
+
+            <RadioButton
+              label="All products in specific collections"
+              checked={productSelection === "collections"}
+              id="collections"
+              name="productSelection"
+              onChange={() => setProductSelection("collections")}
+            />
+
+            <Box>
+              <RadioButton
+                label="All products with specific tags"
+                checked={productSelection === "tags"}
+                id="tags"
+                name="productSelection"
+                onChange={() => setProductSelection("tags")}
+                disabled
+              />
+              <Box paddingBlockStart="100">
+                <Text as="p" variant="bodySm" tone="subdued">
+                  Available with Essential plan.{" "}
+                  <Link url="#" removeUnderline>
+                    Upgrade now
+                  </Link>
+                </Text>
+              </Box>
+            </Box>
+
+            <Box>
+              <RadioButton
+                label="Custom position"
+                checked={productSelection === "custom"}
+                id="custom"
+                name="productSelection"
+                onChange={() => setProductSelection("custom")}
+              />
+              <Box paddingBlockStart="100">
+                <Text as="p" variant="bodySm" tone="subdued">
+                  Add timer anywhere using app blocks or code snippet provided
+                  below.
+                </Text>
+              </Box>
+            </Box>
+          </BlockStack>
+
+          <Box>
+            <Text as="p" variant="headingSm" fontWeight="semibold">
+              Timer ID
+            </Text>
+            <Box paddingBlockStart="200">
+              <Text as="p" variant="bodySm" tone="subdued">
+                Save or Publish to show timer ID
+              </Text>
+              <Box paddingBlockStart="100">
+                <Text as="p" variant="bodySm" tone="subdued">
+                  Countdown timer app block can be added, removed, repositioned,
+                  and customized through the theme editor using timer ID.
+                </Text>
+              </Box>
+            </Box>
+          </Box>
         </BlockStack>
+      </Card>
 
-        <Select
-          label="Alignment"
-          options={[
-            { label: "Left", value: "left" },
-            { label: "Center", value: "center" },
-            { label: "Right", value: "right" },
-          ]}
-          value={alignment}
-          onChange={setAlignment}
-        />
-
-        <BlockStack gap="200">
-          <Text as="p" variant="bodyMd" fontWeight="medium">
-            Display settings
+      <Card padding="400">
+        <BlockStack gap="400">
+          <Text as="h4" variant="headingSm" fontWeight="semibold">
+            Geolocation targeting
           </Text>
-          <Checkbox
-            label="Show on mobile devices"
-            checked={showOnMobile}
-            onChange={setShowOnMobile}
-          />
-          <Checkbox
-            label="Show on desktop"
-            checked={showOnDesktop}
-            onChange={setShowOnDesktop}
-          />
-        </BlockStack>
-      </BlockStack>
 
-      <Box paddingBlockStart="400">
-        <Button fullWidth variant="primary" onClick={onSave}>
-          Save Timer
-        </Button>
-      </Box>
+          <BlockStack gap="200">
+            <Box>
+              <RadioButton
+                label="All world"
+                checked={geolocation === "all-world"}
+                id="all-world"
+                name="geolocation"
+                onChange={() => setGeolocation("all-world")}
+              />
+              <Box paddingBlockStart="100">
+                <Text as="p" variant="bodySm" tone="subdued">
+                  Excluding specific countries from other timers
+                </Text>
+              </Box>
+            </Box>
+
+            <Box>
+              <RadioButton
+                label="Specific countries"
+                checked={geolocation === "specific-countries"}
+                id="specific-countries"
+                name="geolocation"
+                onChange={() => setGeolocation("specific-countries")}
+                disabled
+              />
+              <Box paddingBlockStart="100">
+                <Text as="p" variant="bodySm" tone="subdued">
+                  Available with Essential plan.{" "}
+                  <Link url="#" removeUnderline>
+                    Upgrade now
+                  </Link>
+                </Text>
+              </Box>
+            </Box>
+          </BlockStack>
+        </BlockStack>
+      </Card>
     </FormLayout>
   );
 }

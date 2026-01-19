@@ -70,7 +70,7 @@ export default function TimerConfigPage() {
       case 1:
         return <DesignTab onContinue={() => handleTabChange(2)} />;
       case 2:
-        return <PlacementTab onSave={handleSave} />;
+        return <PlacementTab />;
       default:
         return null;
     }
@@ -83,7 +83,7 @@ export default function TimerConfigPage() {
         content: "Back",
         url: "/new",
       }}
-      titleMetadata={<Badge tone="info">Not published</Badge>}
+      titleMetadata={<Badge>Not published</Badge>}
       subtitle="Timer ID: Save or Publish to show timer ID"
       primaryAction={{ content: "Publish" }}
     >
