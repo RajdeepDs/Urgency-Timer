@@ -16,6 +16,7 @@ import {
 import { useCallback, useState } from "react";
 
 interface ContentTabProps {
+  timerType: "product" | "top-bottom-bar";
   timerName: string;
   setTimerName: (value: string) => void;
   title: string;
@@ -26,6 +27,7 @@ interface ContentTabProps {
 }
 
 export default function ContentTab({
+  timerType,
   timerName,
   setTimerName,
   title,
@@ -48,6 +50,9 @@ export default function ContentTab({
   const [hour, setHour] = useState("4");
   const [minute, setMinute] = useState("29");
   const [period, setPeriod] = useState("PM");
+  const [callToAction, setCallToAction] = useState("button");
+  const [buttonText, setButtonText] = useState("Shop now!");
+  const [buttonLink, setButtonLink] = useState("");
   const [onceItEnds, setOnceItEnds] = useState("unpublish");
 
   const togglePopoverActive = useCallback(
@@ -92,6 +97,34 @@ export default function ContentTab({
         placeholder="Sale ends in:"
         autoComplete="off"
       />
+      {timerType === "top-bottom-bar" && (
+        <BlockStack gap="400">
+          <Select
+            label="Call to action"
+            options={[
+              { label: "No call to action", value: "no" },
+              { label: "Button", value: "button" },
+              { label: "Make entire bar clickable", value: "clickable" },
+            ]}
+            value={callToAction}
+            onChange={setCallToAction}
+          />
+          <TextField
+            label="Button Text"
+            value={buttonText}
+            onChange={setButtonText}
+            placeholder="Shop now!"
+            autoComplete="off"
+          />
+          <TextField
+            label="Link"
+            value={buttonLink}
+            onChange={setButtonLink}
+            placeholder="Enter link"
+            autoComplete="off"
+          />
+        </BlockStack>
+      )}
       <BlockStack gap="100">
         <Text as="p" variant="bodyMd">
           Timer labels

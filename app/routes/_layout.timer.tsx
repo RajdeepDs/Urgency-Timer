@@ -28,10 +28,6 @@ export default function TimerConfigPage() {
     [],
   );
 
-  const handleSave = () => {
-    console.log("Saving timer...");
-  };
-
   const tabs = [
     {
       id: "content-1",
@@ -58,6 +54,7 @@ export default function TimerConfigPage() {
       case 0:
         return (
           <ContentTab
+            timerType={timerType ?? "product"}
             timerName={timerName}
             setTimerName={setTimerName}
             title={title}
