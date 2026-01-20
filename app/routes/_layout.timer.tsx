@@ -65,7 +65,12 @@ export default function TimerConfigPage() {
           />
         );
       case 1:
-        return <DesignTab onContinue={() => handleTabChange(2)} />;
+        return (
+          <DesignTab
+            timerType={timerType ?? "product"}
+            onContinue={() => handleTabChange(2)}
+          />
+        );
       case 2:
         return <PlacementTab />;
       default:

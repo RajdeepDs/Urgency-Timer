@@ -12,14 +12,17 @@ import {
   ColorPicker,
   Divider,
   Bleed,
+  Select,
 } from "@shopify/polaris";
 import { useState, useCallback } from "react";
 
 interface DesignTabProps {
+  timerType: "product" | "top-bottom-bar";
   onContinue: () => void;
 }
 
-export default function DesignTab({ onContinue }: DesignTabProps) {
+export default function DesignTab({ timerType, onContinue }: DesignTabProps) {
+  const [positioning, setPositioning] = useState("top");
   const [backgroundType, setBackgroundType] = useState("single");
   const [backgroundColor, setBackgroundColor] = useState({
     hue: 0,
@@ -81,6 +84,16 @@ export default function DesignTab({ onContinue }: DesignTabProps) {
   });
   const [legendColorPopover, setLegendColorPopover] = useState(false);
 
+  const [buttonFontSize, setButtonFontSize] = useState("16");
+  const [cornerRadius, setCornerRadius] = useState("4");
+  const [buttonColor, setButtonColor] = useState({
+    hue: 0,
+    saturation: 0,
+    brightness: 1,
+    alpha: 1,
+  });
+  const [buttonColorPopover, setButtonColorPopover] = useState(false);
+
   const toggleBgColorPopover = useCallback(
     () => setBgColorPopover((active) => !active),
     [],
@@ -108,6 +121,11 @@ export default function DesignTab({ onContinue }: DesignTabProps) {
 
   const toggleLegendColorPopover = useCallback(
     () => setLegendColorPopover((active) => !active),
+    [],
+  );
+
+  const toggleButtonColorPopover = useCallback(
+    () => setButtonColorPopover((active) => !active),
     [],
   );
 
@@ -166,6 +184,22 @@ export default function DesignTab({ onContinue }: DesignTabProps) {
 
   return (
     <FormLayout>
+      {timerType === "top-bottom-bar" && (
+        <BlockStack gap="400">
+          <Select
+            label="Positioning"
+            options={[
+              { label: "Top page", value: "top" },
+              { label: "Bottom page", value: "bottom" },
+            ]}
+            value={positioning}
+            onChange={setPositioning}
+          />
+          <Bleed marginInline={"400"}>
+            <Divider />
+          </Bleed>
+        </BlockStack>
+      )}
       <BlockStack gap="400">
         <Text as="h4" variant="headingSm" fontWeight="semibold">
           Card
@@ -267,48 +301,53 @@ export default function DesignTab({ onContinue }: DesignTabProps) {
             </InlineStack>
           </BlockStack>
         </Box>
+        {timerType !== "top-bottom-bar" && (
+          <BlockStack gap="400">
+            <Bleed marginInline={"400"}>
+              <Divider />
+            </Bleed>
+            <Text as="p" variant="bodyMd" fontWeight="medium">
+              Spacing
+            </Text>
+            <InlineGrid columns={2} gap="200">
+              <TextField
+                label="Inside top"
+                value={insideTop}
+                onChange={setInsideTop}
+                autoComplete="off"
+                suffix="px"
+                type="number"
+              />
+              <TextField
+                label="Inside bottom"
+                value={insideBottom}
+                onChange={setInsideBottom}
+                autoComplete="off"
+                suffix="px"
+                type="number"
+              />
+            </InlineGrid>
 
-        <Text as="p" variant="bodyMd" fontWeight="medium">
-          Spacing
-        </Text>
-
-        <InlineGrid columns={2} gap="200">
-          <TextField
-            label="Inside top"
-            value={insideTop}
-            onChange={setInsideTop}
-            autoComplete="off"
-            suffix="px"
-            type="number"
-          />
-          <TextField
-            label="Inside bottom"
-            value={insideBottom}
-            onChange={setInsideBottom}
-            autoComplete="off"
-            suffix="px"
-            type="number"
-          />
-        </InlineGrid>
-
-        <InlineGrid columns={2} gap="200">
-          <TextField
-            label="Outside top"
-            value={outsideTop}
-            onChange={setOutsideTop}
-            autoComplete="off"
-            suffix="px"
-            type="number"
-          />
-          <TextField
-            label="Outside bottom"
-            value={outsideBottom}
-            onChange={setOutsideBottom}
-            autoComplete="off"
-            suffix="px"
-            type="number"
-          />
-        </InlineGrid>
+            <InlineGrid columns={2} gap="200">
+              <TextField
+                label="Outside top"
+                value={outsideTop}
+                onChange={setOutsideTop}
+                autoComplete="off"
+                suffix="px"
+                type="number"
+              />
+              <TextField
+                label="Outside bottom"
+                value={outsideBottom}
+                onChange={setOutsideBottom}
+                autoComplete="off"
+                suffix="px"
+                type="number"
+              />
+            </InlineGrid>
+          </BlockStack>
+        )}
       </BlockStack>
       <Bleed marginInline={"400"}>
         <Divider />
@@ -504,6 +543,113 @@ export default function DesignTab({ onContinue }: DesignTabProps) {
           </InlineStack>
         </BlockStack>
       </BlockStack>
+      {timerType === "top-bottom-bar" && (
+        <BlockStack gap="400">
+          <Bleed marginInline={"400"}>
+            <Divider />
+          </Bleed>
+          <Text as="h4" variant="headingSm" fontWeight="semibold">
+            Button
+          </Text>
+          <BlockStack gap="100">
+            <Text as="p" variant="bodyMd">
+              Button color
+            </Text>
+            <InlineStack gap="200" blockAlign="stretch" wrap={false}>
+              <Popover
+                active={borderColorPopover}
+                activator={
+                  <button
+                    type="button"
+                    onClick={toggleBorderColorPopover}
+                    style={{ backgroundColor: hsbToHex(borderColor) }}
+                    className="min-h-8 min-w-11 border border-[#e1e3e5] cursor-pointer rounded-md"
+                  />
+                }
+                onClose={toggleBorderColorPopover}
+              >
+                <Box padding="400">
+                  <ColorPicker color={borderColor} onChange={setBorderColor} />
+                </Box>
+              </Popover>
+              <Box width="100%">
+                <TextField
+                  label="Border color"
+                  labelHidden
+                  value={hsbToHex(borderColor)}
+                  onChange={(value) => {
+                    // Handle hex input if needed
+                  }}
+                  autoComplete="off"
+                />
+              </Box>
+            </InlineStack>
+          </BlockStack>
+          <BlockStack gap="100">
+            <Text as="p" variant="bodyMd">
+              Button font size and color
+            </Text>
+            <InlineStack gap="200" blockAlign="stretch" wrap={false}>
+              <div style={{ width: "110px" }}>
+                <TextField
+                  label="Button font size"
+                  labelHidden
+                  value={buttonFontSize}
+                  onChange={setButtonFontSize}
+                  autoComplete="off"
+                  suffix="px"
+                  type="number"
+                />
+              </div>
+              <Popover
+                active={buttonColorPopover}
+                activator={
+                  <button
+                    type="button"
+                    onClick={toggleButtonColorPopover}
+                    style={{ backgroundColor: hsbToHex(buttonColor) }}
+                    className="min-h-8 min-w-11 border border-[#e1e3e5] cursor-pointer rounded-md shrink-0"
+                  />
+                }
+                onClose={toggleButtonColorPopover}
+              >
+                <Box padding="400">
+                  <ColorPicker color={buttonColor} onChange={setButtonColor} />
+                </Box>
+              </Popover>
+              <div className="flex-1">
+                <TextField
+                  label="Button color"
+                  labelHidden
+                  value={hsbToHex(buttonColor)}
+                  onChange={(value) => {
+                    // Handle hex input if needed
+                  }}
+                  autoComplete="off"
+                />
+              </div>
+            </InlineStack>
+          </BlockStack>
+          <BlockStack gap="100">
+            <Text as="p" variant="bodyMd">
+              Corner radius
+            </Text>
+            <InlineStack gap="200" blockAlign="stretch" wrap={false}>
+              <div style={{ width: "110px" }}>
+                <TextField
+                  label="Corner radius"
+                  labelHidden
+                  value={cornerRadius}
+                  onChange={setCornerRadius}
+                  autoComplete="off"
+                  suffix="px"
+                  type="number"
+                />
+              </div>
+            </InlineStack>
+          </BlockStack>
+        </BlockStack>
+      )}
       <Bleed marginInline={"400"}>
         <Divider />
       </Bleed>
