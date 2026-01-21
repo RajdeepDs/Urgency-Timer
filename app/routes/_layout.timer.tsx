@@ -3,9 +3,8 @@ import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import {
   useSearchParams,
   useLoaderData,
-  useSubmit,
   useNavigation,
-  useActionData,
+  Form,
 } from "@remix-run/react";
 import { useCallback, useState, useEffect } from "react";
 import {
@@ -15,7 +14,6 @@ import {
   Tabs,
   Card,
   InlineGrid,
-  Toast,
   Frame,
 } from "@shopify/polaris";
 import { authenticate } from "../shopify.server";
@@ -37,12 +35,6 @@ import type {
 
 type LoaderData = {
   timer: Timer | null;
-  error?: string;
-};
-
-type ActionData = {
-  timer?: Timer;
-  success?: boolean;
   error?: string;
 };
 
@@ -91,17 +83,14 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     // Parse timer data from form
     const timerDataString = formData.get("timerData")?.toString();
     if (!timerDataString) {
-      return json<ActionData>(
-        { error: "No timer data provided" },
-        { status: 400 },
-      );
+      return json({ error: "No timer data provided" }, { status: 400 });
     }
 
     const timerData = JSON.parse(timerDataString) as TimerFormData;
 
     // Validate required fields
     if (!timerData.name || !timerData.title || !timerData.type) {
-      return json<ActionData>(
+      return json(
         { error: "Missing required fields: name, title, and type" },
         { status: 400 },
       );
@@ -160,7 +149,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         },
       });
 
-      return json<ActionData>({ timer: timer as any, success: true });
+      return json({ timer: timer as any, success: true });
     } else {
       // Create new timer
       const timer = await db.timer.create({
@@ -214,11 +203,11 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         },
       });
 
-      return json<ActionData>({ timer: timer as any, success: true });
+      return json({ timer: timer as any, success: true });
     }
   } catch (error) {
     console.error("Error saving timer:", error);
-    return json<ActionData>({ error: "Failed to save timer" }, { status: 500 });
+    return json({ error: "Failed to save timer" }, { status: 500 });
   }
 };
 
@@ -247,8 +236,6 @@ function combineDateTime(
 export default function TimerConfigPage() {
   const [searchParams] = useSearchParams();
   const loaderData = useLoaderData<typeof loader>();
-  const actionData = useActionData<typeof action>();
-  const submit = useSubmit();
   const navigation = useNavigation();
 
   const timerTypeParam = searchParams.get("type");
@@ -264,8 +251,6 @@ export default function TimerConfigPage() {
     | "cart-page";
 
   const [selected, setSelected] = useState(0);
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState("");
 
   // Content Tab State
   const [timerName, setTimerName] = useState(existingTimer?.name || "");
@@ -377,25 +362,104 @@ export default function TimerConfigPage() {
     }
   }, [existingTimer]);
 
-  // Show toast on successful save
-  useEffect(() => {
-    if (actionData?.success) {
-      setToastMessage(
-        isPublished ? "Timer published successfully" : "Timer saved as draft",
-      );
-      setShowToast(true);
-    } else if (actionData?.error) {
-      setToastMessage(actionData.error);
-      setShowToast(true);
-    }
-  }, [actionData, isPublished]);
-
   const handleTabChange = useCallback(
     (selectedTabIndex: number) => setSelected(selectedTabIndex),
     [],
   );
 
-  const handleSave = (publish: boolean = false) => {
+  const handleSubmit = useCallback(
+    (event: React.FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+
+      // Combine date and time for countdown timers
+      const finalEndDate =
+        timerTypeValue === "countdown"
+          ? combineDateTime(endDate, hour, minute, period)
+          : null;
+
+      const timerData: TimerFormData = {
+        name: timerName,
+        title: title,
+        subheading: subheading,
+        type: timerType,
+
+        // Timer settings
+        timerType: timerTypeValue,
+        endDate: finalEndDate,
+        fixedMinutes:
+          timerTypeValue === "fixed" ? parseInt(fixedMinutes, 10) : null,
+        isRecurring: false,
+        recurringConfig: null,
+
+        // Labels
+        daysLabel: daysLabel,
+        hoursLabel: hoursLabel,
+        minutesLabel: minutesLabel,
+        secondsLabel: secondsLabel,
+
+        // Scheduling
+        startsAt: null,
+        onExpiry: onceItEnds,
+
+        // CTA (for top-bottom-bar)
+        ctaType: timerType === "top-bottom-bar" ? callToAction : null,
+        buttonText: timerType === "top-bottom-bar" ? buttonText : null,
+        buttonLink: timerType === "top-bottom-bar" ? buttonLink : null,
+
+        // Design & Placement
+        designConfig: designConfig,
+        placementConfig: placementConfig,
+
+        // Product/Page Selection
+        productSelection: placementConfig.productSelection || "all",
+        selectedProducts: placementConfig.selectedProducts || null,
+        selectedCollections: placementConfig.selectedCollections || null,
+        excludedProducts: placementConfig.excludedProducts || null,
+        productTags: placementConfig.productTags || null,
+
+        pageSelection: placementConfig.pageSelection || null,
+        excludedPages: placementConfig.excludedPages || null,
+
+        // Geolocation
+        geolocation: placementConfig.geolocation || "all-world",
+        countries: placementConfig.countries || null,
+
+        isPublished: false,
+      };
+
+      // Create form data
+      const form = event.currentTarget;
+      const formData = new FormData(form);
+      formData.set("timerData", JSON.stringify(timerData));
+
+      // Submit the form programmatically
+      form.submit();
+    },
+    [
+      timerName,
+      title,
+      subheading,
+      timerType,
+      timerTypeValue,
+      endDate,
+      hour,
+      minute,
+      period,
+      fixedMinutes,
+      daysLabel,
+      hoursLabel,
+      minutesLabel,
+      secondsLabel,
+      onceItEnds,
+      callToAction,
+      buttonText,
+      buttonLink,
+      designConfig,
+      placementConfig,
+    ],
+  );
+
+  const handlePublish = useCallback(() => {
     // Combine date and time for countdown timers
     const finalEndDate =
       timerTypeValue === "countdown"
@@ -423,7 +487,7 @@ export default function TimerConfigPage() {
       secondsLabel: secondsLabel,
 
       // Scheduling
-      startsAt: null, // TODO: Implement scheduling
+      startsAt: null,
       onExpiry: onceItEnds,
 
       // CTA (for top-bottom-bar)
@@ -449,29 +513,73 @@ export default function TimerConfigPage() {
       geolocation: placementConfig.geolocation || "all-world",
       countries: placementConfig.countries || null,
 
-      isPublished: publish,
+      isPublished: true,
     };
 
     const formData = new FormData();
-    formData.append("intent", publish ? "publish" : "save");
+    formData.append("intent", "publish");
     formData.append("timerData", JSON.stringify(timerData));
     if (timerId) {
       formData.append("timerId", timerId);
     }
 
-    submit(formData, { method: "post" });
-  };
+    // Use fetcher or Form to submit
+    const form = document.createElement("form");
+    form.method = "POST";
+    formData.forEach((value, key) => {
+      const input = document.createElement("input");
+      input.type = "hidden";
+      input.name = key;
+      input.value = value.toString();
+      form.appendChild(input);
+    });
+    document.body.appendChild(form);
+    form.submit();
+  }, [
+    timerName,
+    title,
+    subheading,
+    timerType,
+    timerTypeValue,
+    endDate,
+    hour,
+    minute,
+    period,
+    fixedMinutes,
+    daysLabel,
+    hoursLabel,
+    minutesLabel,
+    secondsLabel,
+    onceItEnds,
+    callToAction,
+    buttonText,
+    buttonLink,
+    designConfig,
+    placementConfig,
+    timerId,
+  ]);
 
-  const handleDelete = () => {
+  const handleDelete = useCallback(() => {
     if (!timerId) return;
 
     if (confirm("Are you sure you want to delete this timer?")) {
       const formData = new FormData();
       formData.append("intent", "delete");
       formData.append("timerId", timerId);
-      submit(formData, { method: "post" });
+
+      const form = document.createElement("form");
+      form.method = "POST";
+      formData.forEach((value, key) => {
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = key;
+        input.value = value.toString();
+        form.appendChild(input);
+      });
+      document.body.appendChild(form);
+      form.submit();
     }
-  };
+  }, [timerId]);
 
   const tabs = [
     {
@@ -571,30 +679,16 @@ export default function TimerConfigPage() {
     }
   };
 
-  const secondaryActions = [
-    {
-      content: "Save as draft",
-      loading: isSaving,
-      onAction: () => handleSave(false),
-    },
-  ];
-
-  if (timerId) {
-    secondaryActions.push({
-      content: "Delete",
-      loading: isSaving,
-      destructive: true,
-      onAction: handleDelete,
-    } as any);
-  }
-
-  const toastMarkup = showToast ? (
-    <Toast
-      content={toastMessage}
-      onDismiss={() => setShowToast(false)}
-      error={!!actionData?.error}
-    />
-  ) : null;
+  const secondaryActions = timerId
+    ? [
+        {
+          content: "Delete",
+          loading: isSaving,
+          destructive: true,
+          onAction: handleDelete,
+        },
+      ]
+    : [];
 
   return (
     <Frame>
@@ -611,31 +705,37 @@ export default function TimerConfigPage() {
             <Badge>Draft</Badge>
           )
         }
-        subtitle={
-          timerId ? `Timer ID: ${timerId}` : "Save or Publish to show timer ID"
+        subtitle={timerId ? `Timer ID: ${timerId}` : "Save to show timer ID"}
+        primaryAction={
+          !isPublished
+            ? {
+                content: "Publish",
+                loading: isSaving,
+                onAction: handlePublish,
+              }
+            : undefined
         }
-        primaryAction={{
-          content: isPublished ? "Update" : "Publish",
-          loading: isSaving,
-          onAction: () => handleSave(true),
-        }}
         secondaryActions={secondaryActions}
       >
-        <Box paddingBlockEnd="800">
-          <Tabs tabs={tabs} selected={selected} onSelect={handleTabChange}>
-            <Box paddingBlockStart="400">
-              <InlineGrid columns={{ xs: 1, lg: "2fr 3fr" }} gap="400">
-                <Box>
-                  <Card padding="400">{renderTabContent()}</Card>
-                </Box>
-                <Box>
-                  <TimerPreview title={title} subheading={subheading} />
-                </Box>
-              </InlineGrid>
-            </Box>
-          </Tabs>
-        </Box>
-        {toastMarkup}
+        <Form method="post" data-save-bar onSubmit={handleSubmit}>
+          <input type="hidden" name="intent" value="save" />
+          {timerId && <input type="hidden" name="timerId" value={timerId} />}
+
+          <Box paddingBlockEnd="800">
+            <Tabs tabs={tabs} selected={selected} onSelect={handleTabChange}>
+              <Box paddingBlockStart="400">
+                <InlineGrid columns={{ xs: 1, lg: "2fr 3fr" }} gap="400">
+                  <Box>
+                    <Card padding="400">{renderTabContent()}</Card>
+                  </Box>
+                  <Box>
+                    <TimerPreview title={title} subheading={subheading} />
+                  </Box>
+                </InlineGrid>
+              </Box>
+            </Tabs>
+          </Box>
+        </Form>
       </Page>
     </Frame>
   );
