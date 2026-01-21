@@ -14,15 +14,64 @@ import {
   FormLayout,
 } from "@shopify/polaris";
 import { useCallback, useState } from "react";
+import type {
+  TimerTypeValue,
+  TimerStarts,
+  OnExpiryAction,
+  CallToActionType,
+} from "../../types/timer";
 
 interface ContentTabProps {
-  timerType: "product" | "top-bottom-bar";
+  timerType: "product-page" | "top-bottom-bar";
   timerName: string;
   setTimerName: (value: string) => void;
   title: string;
   setTitle: (value: string) => void;
   subheading: string;
   setSubheading: (value: string) => void;
+
+  // Timer type settings
+  timerTypeValue: TimerTypeValue;
+  setTimerTypeValue: (value: TimerTypeValue) => void;
+  timerStarts: TimerStarts;
+  setTimerStarts: (value: TimerStarts) => void;
+
+  // End date and time
+  endDate: Date;
+  setEndDate: (date: Date) => void;
+  hour: string;
+  setHour: (value: string) => void;
+  minute: string;
+  setMinute: (value: string) => void;
+  period: "AM" | "PM";
+  setPeriod: (value: "AM" | "PM") => void;
+
+  // Fixed minutes (for fixed timer type)
+  fixedMinutes: string;
+  setFixedMinutes: (value: string) => void;
+
+  // Timer labels
+  daysLabel: string;
+  setDaysLabel: (value: string) => void;
+  hoursLabel: string;
+  setHoursLabel: (value: string) => void;
+  minutesLabel: string;
+  setMinutesLabel: (value: string) => void;
+  secondsLabel: string;
+  setSecondsLabel: (value: string) => void;
+
+  // Once it ends
+  onceItEnds: OnExpiryAction;
+  setOnceItEnds: (value: OnExpiryAction) => void;
+
+  // CTA (for top-bottom-bar)
+  callToAction?: CallToActionType;
+  setCallToAction?: (value: CallToActionType) => void;
+  buttonText?: string;
+  setButtonText?: (value: string) => void;
+  buttonLink?: string;
+  setButtonLink?: (value: string) => void;
+
   onContinue: () => void;
 }
 
@@ -34,26 +83,47 @@ export default function ContentTab({
   setTitle,
   subheading,
   setSubheading,
+  timerTypeValue,
+  setTimerTypeValue,
+  timerStarts,
+  setTimerStarts,
+  endDate,
+  setEndDate,
+  hour,
+  setHour,
+  minute,
+  setMinute,
+  period,
+  setPeriod,
+  fixedMinutes,
+  setFixedMinutes,
+  daysLabel,
+  setDaysLabel,
+  hoursLabel,
+  setHoursLabel,
+  minutesLabel,
+  setMinutesLabel,
+  secondsLabel,
+  setSecondsLabel,
+  onceItEnds,
+  setOnceItEnds,
+  callToAction,
+  setCallToAction,
+  buttonText,
+  setButtonText,
+  buttonLink,
+  setButtonLink,
   onContinue,
 }: ContentTabProps) {
-  const [timerTypeValue, setTimerTypeValue] = useState("countdown");
-  const [timerStarts, setTimerStarts] = useState("now");
   const [selectedDate, setSelectedDate] = useState({
-    month: 0,
-    year: 2026,
+    month: endDate.getMonth(),
+    year: endDate.getFullYear(),
   });
   const [selectedDates, setSelectedDates] = useState({
-    start: new Date("2026-01-20"),
-    end: new Date("2026-01-20"),
+    start: endDate,
+    end: endDate,
   });
   const [popoverActive, setPopoverActive] = useState(false);
-  const [hour, setHour] = useState("4");
-  const [minute, setMinute] = useState("29");
-  const [period, setPeriod] = useState("PM");
-  const [callToAction, setCallToAction] = useState("button");
-  const [buttonText, setButtonText] = useState("Shop now!");
-  const [buttonLink, setButtonLink] = useState("");
-  const [onceItEnds, setOnceItEnds] = useState("unpublish");
 
   const togglePopoverActive = useCallback(
     () => setPopoverActive((popoverActive) => !popoverActive),
@@ -63,6 +133,14 @@ export default function ContentTab({
   const handleMonthChange = useCallback(
     (month: number, year: number) => setSelectedDate({ month, year }),
     [],
+  );
+
+  const handleDateChange = useCallback(
+    (dates: { start: Date; end: Date }) => {
+      setSelectedDates(dates);
+      setEndDate(dates.start);
+    },
+    [setEndDate],
   );
 
   const formatDate = (date: Date) => {
@@ -97,7 +175,7 @@ export default function ContentTab({
         placeholder="Sale ends in:"
         autoComplete="off"
       />
-      {timerType === "top-bottom-bar" && (
+      {timerType === "top-bottom-bar" && callToAction && setCallToAction && (
         <BlockStack gap="400">
           <Select
             label="Call to action"
@@ -107,22 +185,26 @@ export default function ContentTab({
               { label: "Make entire bar clickable", value: "clickable" },
             ]}
             value={callToAction}
-            onChange={setCallToAction}
+            onChange={(value) => setCallToAction(value as CallToActionType)}
           />
-          <TextField
-            label="Button Text"
-            value={buttonText}
-            onChange={setButtonText}
-            placeholder="Shop now!"
-            autoComplete="off"
-          />
-          <TextField
-            label="Link"
-            value={buttonLink}
-            onChange={setButtonLink}
-            placeholder="Enter link"
-            autoComplete="off"
-          />
+          {buttonText !== undefined && setButtonText && (
+            <TextField
+              label="Button Text"
+              value={buttonText}
+              onChange={setButtonText}
+              placeholder="Shop now!"
+              autoComplete="off"
+            />
+          )}
+          {buttonLink !== undefined && setButtonLink && (
+            <TextField
+              label="Link"
+              value={buttonLink}
+              onChange={setButtonLink}
+              placeholder="Enter link"
+              autoComplete="off"
+            />
+          )}
         </BlockStack>
       )}
       <BlockStack gap="100">
@@ -130,10 +212,34 @@ export default function ContentTab({
           Timer labels
         </Text>
         <InlineGrid gap="200" columns={4}>
-          <TextField label="Days" labelHidden value="Days" autoComplete="off" />
-          <TextField label="Hrs" labelHidden value="Hrs" autoComplete="off" />
-          <TextField label="Mins" labelHidden value="Mins" autoComplete="off" />
-          <TextField label="Secs" labelHidden value="Secs" autoComplete="off" />
+          <TextField
+            label="Days"
+            labelHidden
+            value={daysLabel}
+            onChange={setDaysLabel}
+            autoComplete="off"
+          />
+          <TextField
+            label="Hrs"
+            labelHidden
+            value={hoursLabel}
+            onChange={setHoursLabel}
+            autoComplete="off"
+          />
+          <TextField
+            label="Mins"
+            labelHidden
+            value={minutesLabel}
+            onChange={setMinutesLabel}
+            autoComplete="off"
+          />
+          <TextField
+            label="Secs"
+            labelHidden
+            value={secondsLabel}
+            onChange={setSecondsLabel}
+            autoComplete="off"
+          />
         </InlineGrid>
       </BlockStack>
       <Bleed marginInline={"400"}>
@@ -163,6 +269,20 @@ export default function ContentTab({
               onChange={() => setTimerTypeValue("fixed")}
             />
           </Box>
+
+          {timerTypeValue === "fixed" && (
+            <TextField
+              label="Fixed minutes"
+              type="number"
+              value={fixedMinutes}
+              onChange={setFixedMinutes}
+              min={1}
+              max={1440}
+              helpText="Enter the number of minutes for the countdown (1-1440)"
+              autoComplete="off"
+            />
+          )}
+
           <BlockStack as="fieldset" gap={{ xs: "400", md: "0" }}>
             <Box as="legend" paddingBlockEnd={{ xs: "0", md: "100" }}>
               <Text as="span" variant="bodyMd">
@@ -187,68 +307,70 @@ export default function ContentTab({
               />
             </BlockStack>
           </BlockStack>
-          <BlockStack gap="200">
-            <Text as="span" variant="bodyMd">
-              End date
-            </Text>
-            <Popover
-              active={popoverActive}
-              activator={
-                <TextField
-                  label="End date"
-                  labelHidden
-                  value={formatDate(selectedDates.start)}
-                  onFocus={togglePopoverActive}
-                  autoComplete="off"
-                />
-              }
-              onClose={togglePopoverActive}
-            >
-              <Box padding="400" maxWidth="100%">
-                <div style={{ maxWidth: "276px" }}>
-                  <DatePicker
-                    month={selectedDate.month}
-                    year={selectedDate.year}
-                    onChange={setSelectedDates}
-                    onMonthChange={handleMonthChange}
-                    selected={selectedDates}
+          {timerTypeValue === "countdown" && (
+            <BlockStack gap="200">
+              <Text as="span" variant="bodyMd">
+                End date
+              </Text>
+              <Popover
+                active={popoverActive}
+                activator={
+                  <TextField
+                    label="End date"
+                    labelHidden
+                    value={formatDate(selectedDates.start)}
+                    onFocus={togglePopoverActive}
+                    autoComplete="off"
                   />
-                </div>
-              </Box>
-            </Popover>
-            <InlineGrid columns={3} gap="200">
-              <TextField
-                label="Hour"
-                labelHidden
-                type="number"
-                value={hour}
-                onChange={setHour}
-                autoComplete="off"
-                min={1}
-                max={12}
-              />
-              <TextField
-                label="Minute"
-                labelHidden
-                type="number"
-                value={minute}
-                onChange={setMinute}
-                autoComplete="off"
-                min={0}
-                max={59}
-              />
-              <Select
-                label="Period"
-                labelHidden
-                options={[
-                  { label: "AM", value: "AM" },
-                  { label: "PM", value: "PM" },
-                ]}
-                value={period}
-                onChange={setPeriod}
-              />
-            </InlineGrid>
-          </BlockStack>
+                }
+                onClose={togglePopoverActive}
+              >
+                <Box padding="400" maxWidth="100%">
+                  <div style={{ maxWidth: "276px" }}>
+                    <DatePicker
+                      month={selectedDate.month}
+                      year={selectedDate.year}
+                      onChange={handleDateChange}
+                      onMonthChange={handleMonthChange}
+                      selected={selectedDates}
+                    />
+                  </div>
+                </Box>
+              </Popover>
+              <InlineGrid columns={3} gap="200">
+                <TextField
+                  label="Hour"
+                  labelHidden
+                  type="number"
+                  value={hour}
+                  onChange={setHour}
+                  autoComplete="off"
+                  min={1}
+                  max={12}
+                />
+                <TextField
+                  label="Minute"
+                  labelHidden
+                  type="number"
+                  value={minute}
+                  onChange={setMinute}
+                  autoComplete="off"
+                  min={0}
+                  max={59}
+                />
+                <Select
+                  label="Period"
+                  labelHidden
+                  options={[
+                    { label: "AM", value: "AM" },
+                    { label: "PM", value: "PM" },
+                  ]}
+                  value={period}
+                  onChange={(value) => setPeriod(value as "AM" | "PM")}
+                />
+              </InlineGrid>
+            </BlockStack>
+          )}
 
           <BlockStack gap="200">
             <Text as="span" variant="bodyMd">
@@ -263,7 +385,7 @@ export default function ContentTab({
                 { label: "Hide timer", value: "hide" },
               ]}
               value={onceItEnds}
-              onChange={setOnceItEnds}
+              onChange={(value) => setOnceItEnds(value as OnExpiryAction)}
             />
           </BlockStack>
         </BlockStack>
