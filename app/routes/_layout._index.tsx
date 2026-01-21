@@ -1,5 +1,5 @@
 import type { LoaderFunctionArgs } from "@remix-run/node";
-import { useNavigate } from "@remix-run/react";
+import { useLoaderData, useNavigate } from "@remix-run/react";
 import {
   Page,
   Text,
@@ -10,18 +10,47 @@ import {
   InlineStack,
   Grid,
   InlineGrid,
+  DataTable,
+  Badge,
 } from "@shopify/polaris";
 import { TitleBar } from "@shopify/app-bridge-react";
 import { authenticate } from "../shopify.server";
+import prisma from "app/db.server";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  await authenticate.admin(request);
+  const { session } = await authenticate.admin(request);
 
-  return null;
+  // Fetch shop info
+  const shop = await prisma.shop.findUnique({
+    where: { shopDomain: session.shop },
+  });
+
+  // Fetch all timers
+  const timers = await prisma.timer.findMany({
+    where: { shop: session.shop },
+    orderBy: { createdAt: "desc" },
+  });
+
+  return Response.json({ shop, timers });
 };
 
 export default function Index() {
   const navigate = useNavigate();
+
+  const { shop, timers } = useLoaderData<typeof loader>();
+
+  const planLimits: Record<string, number> = {
+    Free: 1000,
+    starter: 10000,
+    essential: 50000,
+    professional: -1,
+  };
+
+  const limit = planLimits[shop?.currentPlan || "Free"];
+  const usageText =
+    limit === -1
+      ? `${shop?.monthlyViews || 0} views this month`
+      : `${shop?.monthlyViews || 0}/${limit} monthly views`;
   return (
     <Page>
       <TitleBar title="Urgency Timer" />
@@ -51,36 +80,68 @@ export default function Index() {
           <Text as="h2" variant="bodyMd">
             You're currently on{" "}
             <Text as="span" variant="headingSm">
-              Free Plan.
+              {shop?.currentPlan || "Free"} Plan.
             </Text>{" "}
-            (0/1000 monthly views). One visitor can have multiple views per
-            session.
+            ({usageText}). One visitor can have multiple views per session.
           </Text>
         </Card>
-        <Card padding={"1200"}>
-          <BlockStack gap="200" align="center">
-            <Text as="h2" variant="headingLg" alignment="center">
-              This is where you'll manage your timers.
-            </Text>
 
-            <Text as="p" variant="bodyMd" alignment="center">
-              Start by creating your first countdown timer and publishing it to
-              your store.
-            </Text>
+        {timers.length === 0 ? (
+          <Card padding={"1200"}>
+            <BlockStack gap="200" align="center">
+              <Text as="h2" variant="headingLg" alignment="center">
+                This is where you'll manage your timers.
+              </Text>
 
-            <Box paddingBlockStart="400">
-              <InlineStack align="center">
-                <Button
-                  variant="primary"
-                  size="large"
-                  onClick={() => navigate("/new")}
-                >
-                  Create a new timer
-                </Button>
-              </InlineStack>
-            </Box>
-          </BlockStack>
-        </Card>
+              <Text as="p" variant="bodyMd" alignment="center">
+                Start by creating your first countdown timer and publishing it
+                to your store.
+              </Text>
+
+              <Box paddingBlockStart="400">
+                <InlineStack align="center">
+                  <Button
+                    variant="primary"
+                    size="large"
+                    onClick={() => navigate("/new")}
+                  >
+                    Create a new timer
+                  </Button>
+                </InlineStack>
+              </Box>
+            </BlockStack>
+          </Card>
+        ) : (
+          <Card>
+            <DataTable
+              columnContentTypes={["text", "text", "text", "numeric", "text"]}
+              headings={["Name", "Type", "Status", "Views", "Actions"]}
+              rows={timers.map((timer) => [
+                timer.name,
+                timer.type,
+                timer.isPublished ? (
+                  <Badge tone="success">Published</Badge>
+                ) : (
+                  <Badge>Draft</Badge>
+                ),
+                timer.viewCount,
+                <InlineStack gap="200" key={timer}>
+                  <Button
+                    size="slim"
+                    onClick={() =>
+                      navigate(`/timer?id=${timer.id}&type=${timer.type}`)
+                    }
+                  >
+                    Edit
+                  </Button>
+                  <Button size="slim" tone="critical">
+                    Delete
+                  </Button>
+                </InlineStack>,
+              ])}
+            />
+          </Card>
+        )}
       </BlockStack>
     </Page>
   );
