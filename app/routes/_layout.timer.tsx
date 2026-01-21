@@ -4,6 +4,7 @@ import {
   useSearchParams,
   useLoaderData,
   useNavigation,
+  useSubmit,
   Form,
 } from "@remix-run/react";
 import { useCallback, useState, useEffect } from "react";
@@ -237,6 +238,7 @@ export default function TimerConfigPage() {
   const [searchParams] = useSearchParams();
   const loaderData = useLoaderData<typeof loader>();
   const navigation = useNavigation();
+  const submit = useSubmit();
 
   const timerTypeParam = searchParams.get("type");
   const timerId = searchParams.get("id");
@@ -253,7 +255,9 @@ export default function TimerConfigPage() {
   const [selected, setSelected] = useState(0);
 
   // Content Tab State
-  const [timerName, setTimerName] = useState(existingTimer?.name || "");
+  const [timerName, setTimerName] = useState(
+    existingTimer?.name || "Timer name",
+  );
   const [title, setTitle] = useState(existingTimer?.title || "Hurry up!");
   const [subheading, setSubheading] = useState(
     existingTimer?.subheading || "Sale ends in:",
@@ -427,13 +431,15 @@ export default function TimerConfigPage() {
         isPublished: false,
       };
 
-      // Create form data
-      const form = event.currentTarget;
-      const formData = new FormData(form);
-      formData.set("timerData", JSON.stringify(timerData));
+      // Create form data and submit using Remix submit
+      const formData = new FormData();
+      formData.append("intent", "save");
+      formData.append("timerData", JSON.stringify(timerData));
+      if (timerId) {
+        formData.append("timerId", timerId);
+      }
 
-      // Submit the form programmatically
-      form.submit();
+      submit(formData, { method: "post" });
     },
     [
       timerName,
@@ -456,6 +462,8 @@ export default function TimerConfigPage() {
       buttonLink,
       designConfig,
       placementConfig,
+      timerId,
+      submit,
     ],
   );
 
