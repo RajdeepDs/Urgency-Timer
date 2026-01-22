@@ -10,12 +10,12 @@ import {
   InlineStack,
   Grid,
   InlineGrid,
-  DataTable,
-  Badge,
 } from "@shopify/polaris";
 import { TitleBar } from "@shopify/app-bridge-react";
 import { authenticate } from "../shopify.server";
 import prisma from "app/db.server";
+import { EmptyState } from "../components/ui/EmptyState";
+import { TimerDataTable } from "../components/timer/TimerDataTable";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { session } = await authenticate.admin(request);
@@ -36,7 +36,6 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
 export default function Index() {
   const navigate = useNavigate();
-
   const { shop, timers } = useLoaderData<typeof loader>();
 
   const planLimits: Record<string, number> = {
@@ -51,6 +50,11 @@ export default function Index() {
     limit === -1
       ? `${shop?.monthlyViews || 0} views this month`
       : `${shop?.monthlyViews || 0}/${limit} monthly views`;
+
+  const handleCreateTimer = () => navigate("/new");
+  const handleTimerClick = (timerId: string) =>
+    navigate(`/timer?id=${timerId}`);
+
   return (
     <Page>
       <TitleBar title="Urgency Timer" />
@@ -87,47 +91,14 @@ export default function Index() {
         </Card>
 
         {timers.length === 0 ? (
-          <Card padding={"1200"}>
-            <BlockStack gap="200" align="center">
-              <Text as="h2" variant="headingLg" alignment="center">
-                This is where you'll manage your timers.
-              </Text>
-
-              <Text as="p" variant="bodyMd" alignment="center">
-                Start by creating your first countdown timer and publishing it
-                to your store.
-              </Text>
-
-              <Box paddingBlockStart="400">
-                <InlineStack align="center">
-                  <Button
-                    variant="primary"
-                    size="large"
-                    onClick={() => navigate("/new")}
-                  >
-                    Create a new timer
-                  </Button>
-                </InlineStack>
-              </Box>
-            </BlockStack>
-          </Card>
+          <EmptyState
+            title="This is where you'll manage your timers."
+            message="Start by creating your first countdown timer and publishing it to your store."
+            actionLabel="Create a new timer"
+            onAction={handleCreateTimer}
+          />
         ) : (
-          <Card padding="0">
-            <DataTable
-              columnContentTypes={["text", "text", "text"]}
-              headings={["Timer name", "Type", "Status"]}
-              rows={timers.map((timer) => [
-                timer.name,
-                timer.type,
-                timer.isPublished ? (
-                  <Badge tone="success">Published</Badge>
-                ) : (
-                  <Badge>Draft</Badge>
-                ),
-              ])}
-              stickyHeader
-            />
-          </Card>
+          <TimerDataTable timers={timers} onTimerClick={handleTimerClick} />
         )}
       </BlockStack>
     </Page>

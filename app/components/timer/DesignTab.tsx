@@ -16,6 +16,7 @@ import {
 } from "@shopify/polaris";
 import { useState, useCallback, useEffect } from "react";
 import type { DesignConfig, ColorHSBA } from "../../types/timer";
+import { hexToHsb, hsbToHex } from "../../utils/timer/color";
 
 interface DesignTabProps {
   timerType: "product" | "top-bottom-bar";
@@ -30,92 +31,6 @@ export default function DesignTab({
   setDesignConfig,
   onContinue,
 }: DesignTabProps) {
-  // Helper functions for color conversion
-  const hexToHsb = (hex: string): ColorHSBA => {
-    // Remove # if present
-    const cleanHex = hex.replace("#", "");
-
-    // Parse hex to RGB
-    const r = parseInt(cleanHex.substring(0, 2), 16) / 255;
-    const g = parseInt(cleanHex.substring(2, 4), 16) / 255;
-    const b = parseInt(cleanHex.substring(4, 6), 16) / 255;
-
-    const max = Math.max(r, g, b);
-    const min = Math.min(r, g, b);
-    const delta = max - min;
-
-    let hue = 0;
-    let saturation = 0;
-    const brightness = max;
-
-    if (delta !== 0) {
-      saturation = delta / max;
-
-      if (max === r) {
-        hue = ((g - b) / delta + (g < b ? 6 : 0)) * 60;
-      } else if (max === g) {
-        hue = ((b - r) / delta + 2) * 60;
-      } else {
-        hue = ((r - g) / delta + 4) * 60;
-      }
-    }
-
-    return {
-      hue: Math.round(hue),
-      saturation: Math.round(saturation * 100) / 100,
-      brightness: Math.round(brightness * 100) / 100,
-      alpha: 1,
-    };
-  };
-
-  const hsbToHex = (hsb: ColorHSBA): string => {
-    const { hue, saturation, brightness } = hsb;
-    const h = hue;
-    const s = saturation;
-    const v = brightness;
-
-    const c = v * s;
-    const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
-    const m = v - c;
-
-    let r = 0,
-      g = 0,
-      b = 0;
-
-    if (h >= 0 && h < 60) {
-      r = c;
-      g = x;
-      b = 0;
-    } else if (h >= 60 && h < 120) {
-      r = x;
-      g = c;
-      b = 0;
-    } else if (h >= 120 && h < 180) {
-      r = 0;
-      g = c;
-      b = x;
-    } else if (h >= 180 && h < 240) {
-      r = 0;
-      g = x;
-      b = c;
-    } else if (h >= 240 && h < 300) {
-      r = x;
-      g = 0;
-      b = c;
-    } else if (h >= 300 && h < 360) {
-      r = c;
-      g = 0;
-      b = x;
-    }
-
-    const toHex = (n: number) => {
-      const hex = Math.round((n + m) * 255).toString(16);
-      return hex.length === 1 ? "0" + hex : hex;
-    };
-
-    return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
-  };
-
   // Helper to handle hex input from text fields
   const handleHexChange = (
     value: string,

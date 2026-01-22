@@ -1,6 +1,10 @@
 // Timer Types for Urgency Timer App
 
-export type TimerType = "product-page" | "top-bottom-bar" | "landing-page" | "cart-page";
+export type TimerType =
+  | "product-page"
+  | "top-bottom-bar"
+  | "landing-page"
+  | "cart-page";
 
 export type TimerTypeValue = "countdown" | "fixed";
 
@@ -10,15 +14,24 @@ export type OnExpiryAction = "unpublish" | "keep" | "hide";
 
 export type CallToActionType = "no" | "button" | "clickable";
 
-export type ProductSelectionType = "all" | "specific" | "collections" | "tags" | "custom";
+export type ProductSelectionType =
+  | "all"
+  | "specific"
+  | "collections"
+  | "tags"
+  | "custom";
 
 export type PageSelectionType =
   | "every-page"
   | "home-page"
   | "all-product-pages"
+  | "specific-product-pages"
   | "all-collection-pages"
+  | "specific-collection-pages"
+  | "specific-collections"
   | "cart-page"
-  | "specific-pages";
+  | "specific-pages"
+  | "custom";
 
 export type GeolocationTargeting = "all-world" | "specific-countries";
 

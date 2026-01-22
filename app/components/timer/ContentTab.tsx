@@ -13,13 +13,13 @@ import {
   DatePicker,
   FormLayout,
 } from "@shopify/polaris";
-import { useCallback, useState } from "react";
 import type {
   TimerTypeValue,
   TimerStarts,
   OnExpiryAction,
   CallToActionType,
 } from "../../types/timer";
+import { useDateTimePicker } from "../../hooks/useDateTimePicker";
 
 interface ContentTabProps {
   timerType: "product-page" | "top-bottom-bar";
@@ -115,41 +115,19 @@ export default function ContentTab({
   setButtonLink,
   onContinue,
 }: ContentTabProps) {
-  const [selectedDate, setSelectedDate] = useState({
-    month: endDate.getMonth(),
-    year: endDate.getFullYear(),
+  // Use custom hook for date picker state
+  const {
+    selectedDate,
+    selectedDates,
+    popoverActive,
+    togglePopoverActive,
+    handleMonthChange,
+    handleDateChange,
+    formatDate,
+  } = useDateTimePicker({
+    initialDate: endDate,
+    onDateChange: setEndDate,
   });
-  const [selectedDates, setSelectedDates] = useState({
-    start: endDate,
-    end: endDate,
-  });
-  const [popoverActive, setPopoverActive] = useState(false);
-
-  const togglePopoverActive = useCallback(
-    () => setPopoverActive((popoverActive) => !popoverActive),
-    [],
-  );
-
-  const handleMonthChange = useCallback(
-    (month: number, year: number) => setSelectedDate({ month, year }),
-    [],
-  );
-
-  const handleDateChange = useCallback(
-    (dates: { start: Date; end: Date }) => {
-      setSelectedDates(dates);
-      setEndDate(dates.start);
-    },
-    [setEndDate],
-  );
-
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  };
 
   return (
     <FormLayout>

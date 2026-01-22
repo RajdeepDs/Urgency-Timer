@@ -1,0 +1,345 @@
+import { useCallback } from "react";
+import {
+  Page,
+  Box,
+  Tabs,
+  Card,
+  InlineGrid,
+  Frame,
+  InlineStack,
+  Button,
+} from "@shopify/polaris";
+import { useSubmit, useNavigation } from "@remix-run/react";
+import { useTimerForm } from "../../hooks/useTimerForm";
+import { useTimerTabs } from "../../hooks/useTimerTabs";
+import ContentTab from "./ContentTab";
+import DesignTab from "./DesignTab";
+import PlacementTab from "./PlacementTab";
+import TimerPreview from "./TimerPreview";
+import { combineDateTime } from "../../utils/timer/datetime";
+import { validateTimerForm } from "../../utils/timer/validation";
+import type { Timer, TimerFormData } from "../../types/timer";
+
+interface TimerFormProps {
+  existingTimer?: Timer | null;
+  timerType: "product-page" | "top-bottom-bar";
+  timerId?: string;
+  onCancel?: () => void;
+}
+
+export function TimerForm({
+  existingTimer,
+  timerType,
+  timerId,
+  onCancel,
+}: TimerFormProps) {
+  const submit = useSubmit();
+  const navigation = useNavigation();
+  const isSaving = navigation.state === "submitting";
+
+  // Use custom hooks for state management
+  const formState = useTimerForm({ existingTimer, timerType });
+  const { selectedTab, handleTabChange, goToNextTab } = useTimerTabs();
+
+  // Handle form submission (save as draft)
+  const handleSubmit = useCallback(
+    async (publish: boolean = false) => {
+      const finalEndDate =
+        formState.timerTypeValue === "countdown"
+          ? combineDateTime(
+              formState.endDate,
+              formState.hour,
+              formState.minute,
+              formState.period,
+            )
+          : null;
+
+      const timerData: TimerFormData = {
+        name: formState.timerName,
+        title: formState.title,
+        subheading: formState.subheading,
+        type: timerType,
+
+        // Timer Type Settings
+        timerType: formState.timerTypeValue,
+        endDate: finalEndDate,
+        fixedMinutes:
+          formState.timerTypeValue === "fixed"
+            ? parseInt(formState.fixedMinutes)
+            : null,
+        isRecurring: false,
+        recurringConfig: null,
+
+        // Labels
+        daysLabel: formState.daysLabel,
+        hoursLabel: formState.hoursLabel,
+        minutesLabel: formState.minutesLabel,
+        secondsLabel: formState.secondsLabel,
+
+        // Scheduling
+        startsAt: new Date(),
+        onExpiry: formState.onceItEnds,
+
+        // CTA
+        ctaType: timerType === "top-bottom-bar" ? formState.callToAction : null,
+        buttonText:
+          timerType === "top-bottom-bar" ? formState.buttonText : null,
+        buttonLink:
+          timerType === "top-bottom-bar" ? formState.buttonLink : null,
+
+        // Design & Placement
+        designConfig: formState.designConfig,
+        placementConfig: formState.placementConfig,
+
+        // Product/Page Selection
+        productSelection: "all",
+        selectedProducts: null,
+        selectedCollections: null,
+        excludedProducts: null,
+        productTags: null,
+
+        pageSelection: timerType === "top-bottom-bar" ? "every-page" : null,
+        excludedPages: null,
+
+        // Geolocation
+        geolocation: "all-world",
+        countries: null,
+
+        // Status
+        isPublished: publish,
+      };
+
+      // Validate form
+      const validation = validateTimerForm(timerData);
+      if (!validation.isValid) {
+        console.error("Validation errors:", validation.errors);
+        // TODO: Show validation errors to user
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("timerData", JSON.stringify(timerData));
+      if (timerId) {
+        formData.append("timerId", timerId);
+      }
+      formData.append("intent", publish ? "publish" : "save");
+
+      submit(formData, {
+        method: timerId ? "PUT" : "POST",
+        action: timerId ? `/timer?id=${timerId}` : "/timer",
+      });
+    },
+    [formState, timerType, timerId, submit],
+  );
+
+  // Handle publish
+  const handlePublish = useCallback(() => {
+    handleSubmit(true);
+  }, [handleSubmit]);
+
+  // Handle save
+  const handleSave = useCallback(() => {
+    handleSubmit(false);
+  }, [handleSubmit]);
+
+  // Handle delete
+  const handleDelete = useCallback(() => {
+    if (!timerId) return;
+
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this timer?",
+    );
+    if (!confirmed) return;
+
+    const formData = new FormData();
+    formData.append("intent", "delete");
+    formData.append("timerId", timerId);
+
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = `/timer?id=${timerId}`;
+
+    const input = document.createElement("input");
+    input.type = "hidden";
+    input.name = "intent";
+    input.value = "delete";
+    form.appendChild(input);
+
+    const timerIdInput = document.createElement("input");
+    timerIdInput.type = "hidden";
+    timerIdInput.name = "timerId";
+    timerIdInput.value = timerId;
+    form.appendChild(timerIdInput);
+
+    document.body.appendChild(form);
+    form.submit();
+  }, [timerId]);
+
+  // Tab definitions
+  const tabs = [
+    {
+      id: "content-tab",
+      content: "Content",
+      accessibilityLabel: "Content settings",
+      panelID: "content-panel",
+    },
+    {
+      id: "design-tab",
+      content: "Design",
+      accessibilityLabel: "Design settings",
+      panelID: "design-panel",
+    },
+    {
+      id: "placement-tab",
+      content: "Placement",
+      accessibilityLabel: "Placement settings",
+      panelID: "placement-panel",
+    },
+  ];
+
+  // Render tab content
+  const renderTabContent = () => {
+    switch (selectedTab) {
+      case 0:
+        return (
+          <ContentTab
+            timerType={timerType}
+            timerName={formState.timerName}
+            setTimerName={formState.setTimerName}
+            title={formState.title}
+            setTitle={formState.setTitle}
+            subheading={formState.subheading}
+            setSubheading={formState.setSubheading}
+            timerTypeValue={formState.timerTypeValue}
+            setTimerTypeValue={formState.setTimerTypeValue}
+            timerStarts={formState.timerStarts}
+            setTimerStarts={formState.setTimerStarts}
+            endDate={formState.endDate}
+            setEndDate={formState.setEndDate}
+            hour={formState.hour}
+            setHour={formState.setHour}
+            minute={formState.minute}
+            setMinute={formState.setMinute}
+            period={formState.period}
+            setPeriod={formState.setPeriod}
+            fixedMinutes={formState.fixedMinutes}
+            setFixedMinutes={formState.setFixedMinutes}
+            daysLabel={formState.daysLabel}
+            setDaysLabel={formState.setDaysLabel}
+            hoursLabel={formState.hoursLabel}
+            setHoursLabel={formState.setHoursLabel}
+            minutesLabel={formState.minutesLabel}
+            setMinutesLabel={formState.setMinutesLabel}
+            secondsLabel={formState.secondsLabel}
+            setSecondsLabel={formState.setSecondsLabel}
+            onceItEnds={formState.onceItEnds}
+            setOnceItEnds={formState.setOnceItEnds}
+            callToAction={formState.callToAction}
+            setCallToAction={formState.setCallToAction}
+            buttonText={formState.buttonText}
+            setButtonText={formState.setButtonText}
+            buttonLink={formState.buttonLink}
+            setButtonLink={formState.setButtonLink}
+            onContinue={goToNextTab}
+          />
+        );
+      case 1:
+        return (
+          <DesignTab
+            timerType={
+              timerType === "product-page" ? "product" : "top-bottom-bar"
+            }
+            designConfig={formState.designConfig}
+            setDesignConfig={formState.setDesignConfig}
+            onContinue={goToNextTab}
+          />
+        );
+      case 2:
+        return (
+          <PlacementTab
+            timerType={
+              timerType === "product-page" ? "product" : "top-bottom-bar"
+            }
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
+  // Secondary actions (delete button for existing timers)
+  const secondaryActions = timerId
+    ? [
+        {
+          content: "Delete timer",
+          loading: isSaving,
+          destructive: true,
+          onAction: handleDelete,
+        },
+      ]
+    : undefined;
+
+  return (
+    <Page
+      title={timerId ? "Edit Timer" : "Create Timer"}
+      backAction={{
+        content: "Timers",
+        url: "/",
+      }}
+      secondaryActions={secondaryActions}
+      primaryAction={{
+        content: timerId ? "Update & Publish" : "Save & Publish",
+        loading: isSaving,
+        onAction: handlePublish,
+      }}
+    >
+      <Frame>
+        <InlineGrid
+          columns={{ xs: 1, lg: ["twoThirds", "oneThird"] }}
+          gap="400"
+        >
+          <Box>
+            <Card>
+              <Tabs
+                tabs={tabs}
+                selected={selectedTab}
+                onSelect={handleTabChange}
+              >
+                <Box padding="400">{renderTabContent()}</Box>
+              </Tabs>
+            </Card>
+
+            <Box paddingBlockStart="400">
+              <InlineStack align="end" gap="200">
+                {onCancel && (
+                  <Button onClick={onCancel} disabled={isSaving}>
+                    Cancel
+                  </Button>
+                )}
+                <Button onClick={handleSave} loading={isSaving}>
+                  Save as Draft
+                </Button>
+              </InlineStack>
+            </Box>
+          </Box>
+
+          <Box>
+            <TimerPreview
+              title={formState.title}
+              subheading={formState.subheading}
+              daysLabel={formState.daysLabel}
+              hoursLabel={formState.hoursLabel}
+              minutesLabel={formState.minutesLabel}
+              secondsLabel={formState.secondsLabel}
+              designConfig={formState.designConfig}
+              timerType={
+                timerType === "product-page" ? "product" : "top-bottom-bar"
+              }
+              buttonText={formState.buttonText}
+            />
+          </Box>
+        </InlineGrid>
+      </Frame>
+    </Page>
+  );
+}

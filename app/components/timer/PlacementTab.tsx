@@ -7,16 +7,22 @@ import {
   Link,
   Card,
 } from "@shopify/polaris";
-import { useState } from "react";
+import { usePlacementState } from "../../hooks/usePlacementState";
 
 interface PlacementTabProps {
   timerType: "product" | "top-bottom-bar";
 }
 
 export default function PlacementTab({ timerType }: PlacementTabProps) {
-  const [productSelection, setProductSelection] = useState("all");
-  const [geolocation, setGeolocation] = useState("all-world");
-  const [pageSelection, setPageSelection] = useState("every-page");
+  // Use custom hook for placement state management
+  const {
+    productSelection,
+    handleProductSelectionChange,
+    pageSelection,
+    handlePageSelectionChange,
+    geolocation,
+    handleGeolocationChange,
+  } = usePlacementState({ timerType });
 
   if (timerType === "top-bottom-bar") {
     return (
@@ -33,7 +39,7 @@ export default function PlacementTab({ timerType }: PlacementTabProps) {
                 checked={pageSelection === "every-page"}
                 id="every-page"
                 name="pageSelection"
-                onChange={() => setPageSelection("every-page")}
+                onChange={() => handlePageSelectionChange("every-page")}
                 helpText={
                   <Link url="#" removeUnderline>
                     Exclude specific pages
@@ -46,7 +52,7 @@ export default function PlacementTab({ timerType }: PlacementTabProps) {
                 checked={pageSelection === "home-page"}
                 id="home-page"
                 name="pageSelection"
-                onChange={() => setPageSelection("home-page")}
+                onChange={() => handlePageSelectionChange("home-page")}
               />
 
               <RadioButton
@@ -54,7 +60,7 @@ export default function PlacementTab({ timerType }: PlacementTabProps) {
                 checked={pageSelection === "all-product-pages"}
                 id="all-product-pages"
                 name="pageSelection"
-                onChange={() => setPageSelection("all-product-pages")}
+                onChange={() => handlePageSelectionChange("all-product-pages")}
               />
 
               <RadioButton
@@ -62,7 +68,9 @@ export default function PlacementTab({ timerType }: PlacementTabProps) {
                 checked={pageSelection === "specific-product-pages"}
                 id="specific-product-pages"
                 name="pageSelection"
-                onChange={() => setPageSelection("specific-product-pages")}
+                onChange={() =>
+                  handlePageSelectionChange("specific-product-pages")
+                }
               />
 
               <RadioButton
@@ -70,7 +78,9 @@ export default function PlacementTab({ timerType }: PlacementTabProps) {
                 checked={pageSelection === "specific-collections"}
                 id="specific-collections"
                 name="pageSelection"
-                onChange={() => setPageSelection("specific-collections")}
+                onChange={() =>
+                  handlePageSelectionChange("specific-collections")
+                }
               />
 
               <RadioButton
@@ -78,7 +88,9 @@ export default function PlacementTab({ timerType }: PlacementTabProps) {
                 checked={pageSelection === "all-collection-pages"}
                 id="all-collection-pages"
                 name="pageSelection"
-                onChange={() => setPageSelection("all-collection-pages")}
+                onChange={() =>
+                  handlePageSelectionChange("all-collection-pages")
+                }
               />
 
               <RadioButton
@@ -86,7 +98,9 @@ export default function PlacementTab({ timerType }: PlacementTabProps) {
                 checked={pageSelection === "specific-collection-pages"}
                 id="specific-collection-pages"
                 name="pageSelection"
-                onChange={() => setPageSelection("specific-collection-pages")}
+                onChange={() =>
+                  handlePageSelectionChange("specific-collection-pages")
+                }
               />
 
               <Box>
@@ -95,7 +109,7 @@ export default function PlacementTab({ timerType }: PlacementTabProps) {
                   checked={pageSelection === "custom"}
                   id="custom"
                   name="pageSelection"
-                  onChange={() => setPageSelection("custom")}
+                  onChange={() => handlePageSelectionChange("custom")}
                 />
                 <Box paddingBlockStart="100">
                   <Text as="p" variant="bodySm" tone="subdued">
@@ -139,7 +153,7 @@ export default function PlacementTab({ timerType }: PlacementTabProps) {
                   checked={geolocation === "all-world"}
                   id="all-world"
                   name="geolocation"
-                  onChange={() => setGeolocation("all-world")}
+                  onChange={() => handleGeolocationChange("all-world")}
                 />
                 <Box paddingBlockStart="100">
                   <Text as="p" variant="bodySm" tone="subdued">
@@ -154,7 +168,7 @@ export default function PlacementTab({ timerType }: PlacementTabProps) {
                   checked={geolocation === "specific-countries"}
                   id="specific-countries"
                   name="geolocation"
-                  onChange={() => setGeolocation("specific-countries")}
+                  onChange={() => handleGeolocationChange("specific-countries")}
                   disabled
                 />
                 <Box paddingBlockStart="100">
@@ -188,7 +202,7 @@ export default function PlacementTab({ timerType }: PlacementTabProps) {
               checked={productSelection === "all"}
               id="all"
               name="productSelection"
-              onChange={() => setProductSelection("all")}
+              onChange={() => handleProductSelectionChange("all")}
               helpText={
                 <Link url="#" removeUnderline>
                   Exclude specific products
@@ -201,7 +215,7 @@ export default function PlacementTab({ timerType }: PlacementTabProps) {
               checked={productSelection === "specific"}
               id="specific"
               name="productSelection"
-              onChange={() => setProductSelection("specific")}
+              onChange={() => handleProductSelectionChange("specific")}
             />
 
             <RadioButton
@@ -209,7 +223,7 @@ export default function PlacementTab({ timerType }: PlacementTabProps) {
               checked={productSelection === "collections"}
               id="collections"
               name="productSelection"
-              onChange={() => setProductSelection("collections")}
+              onChange={() => handleProductSelectionChange("collections")}
             />
 
             <Box>
@@ -218,7 +232,7 @@ export default function PlacementTab({ timerType }: PlacementTabProps) {
                 checked={productSelection === "tags"}
                 id="tags"
                 name="productSelection"
-                onChange={() => setProductSelection("tags")}
+                onChange={() => handleProductSelectionChange("tags")}
                 disabled
               />
               <Box paddingBlockStart="100">
@@ -237,7 +251,7 @@ export default function PlacementTab({ timerType }: PlacementTabProps) {
                 checked={productSelection === "custom"}
                 id="custom"
                 name="productSelection"
-                onChange={() => setProductSelection("custom")}
+                onChange={() => handleProductSelectionChange("custom")}
               />
               <Box paddingBlockStart="100">
                 <Text as="p" variant="bodySm" tone="subdued">
@@ -280,7 +294,7 @@ export default function PlacementTab({ timerType }: PlacementTabProps) {
                 checked={geolocation === "all-world"}
                 id="all-world"
                 name="geolocation"
-                onChange={() => setGeolocation("all-world")}
+                onChange={() => handleGeolocationChange("all-world")}
               />
               <Box paddingBlockStart="100">
                 <Text as="p" variant="bodySm" tone="subdued">
@@ -295,7 +309,7 @@ export default function PlacementTab({ timerType }: PlacementTabProps) {
                 checked={geolocation === "specific-countries"}
                 id="specific-countries"
                 name="geolocation"
-                onChange={() => setGeolocation("specific-countries")}
+                onChange={() => handleGeolocationChange("specific-countries")}
                 disabled
               />
               <Box paddingBlockStart="100">
