@@ -8,6 +8,8 @@ import {
   Frame,
   InlineStack,
   Button,
+  Form,
+  Badge,
 } from "@shopify/polaris";
 import { useSubmit, useNavigation } from "@remix-run/react";
 import { useTimerForm } from "../../hooks/useTimerForm";
@@ -19,6 +21,7 @@ import TimerPreview from "./TimerPreview";
 import { combineDateTime } from "../../utils/timer/datetime";
 import { validateTimerForm } from "../../utils/timer/validation";
 import type { Timer, TimerFormData } from "../../types/timer";
+import { tabs } from "app/config/timer-tabs";
 
 interface TimerFormProps {
   existingTimer?: Timer | null;
@@ -37,11 +40,9 @@ export function TimerForm({
   const navigation = useNavigation();
   const isSaving = navigation.state === "submitting";
 
-  // Use custom hooks for state management
   const formState = useTimerForm({ existingTimer, timerType });
   const { selectedTab, handleTabChange, goToNextTab } = useTimerTabs();
 
-  // Handle form submission (save as draft)
   const handleSubmit = useCallback(
     async (publish: boolean = false) => {
       const finalEndDate =
@@ -60,7 +61,6 @@ export function TimerForm({
         subheading: formState.subheading,
         type: timerType,
 
-        // Timer Type Settings
         timerType: formState.timerTypeValue,
         endDate: finalEndDate,
         fixedMinutes:
@@ -70,28 +70,23 @@ export function TimerForm({
         isRecurring: false,
         recurringConfig: null,
 
-        // Labels
         daysLabel: formState.daysLabel,
         hoursLabel: formState.hoursLabel,
         minutesLabel: formState.minutesLabel,
         secondsLabel: formState.secondsLabel,
 
-        // Scheduling
         startsAt: new Date(),
         onExpiry: formState.onceItEnds,
 
-        // CTA
         ctaType: timerType === "top-bottom-bar" ? formState.callToAction : null,
         buttonText:
           timerType === "top-bottom-bar" ? formState.buttonText : null,
         buttonLink:
           timerType === "top-bottom-bar" ? formState.buttonLink : null,
 
-        // Design & Placement
         designConfig: formState.designConfig,
         placementConfig: formState.placementConfig,
 
-        // Product/Page Selection
         productSelection: "all",
         selectedProducts: null,
         selectedCollections: null,
@@ -101,11 +96,9 @@ export function TimerForm({
         pageSelection: timerType === "top-bottom-bar" ? "every-page" : null,
         excludedPages: null,
 
-        // Geolocation
         geolocation: "all-world",
         countries: null,
 
-        // Status
         isPublished: publish,
       };
 
@@ -132,17 +125,14 @@ export function TimerForm({
     [formState, timerType, timerId, submit],
   );
 
-  // Handle publish
   const handlePublish = useCallback(() => {
     handleSubmit(true);
   }, [handleSubmit]);
 
-  // Handle save
   const handleSave = useCallback(() => {
     handleSubmit(false);
   }, [handleSubmit]);
 
-  // Handle delete
   const handleDelete = useCallback(() => {
     if (!timerId) return;
 
@@ -175,29 +165,6 @@ export function TimerForm({
     form.submit();
   }, [timerId]);
 
-  // Tab definitions
-  const tabs = [
-    {
-      id: "content-tab",
-      content: "Content",
-      accessibilityLabel: "Content settings",
-      panelID: "content-panel",
-    },
-    {
-      id: "design-tab",
-      content: "Design",
-      accessibilityLabel: "Design settings",
-      panelID: "design-panel",
-    },
-    {
-      id: "placement-tab",
-      content: "Placement",
-      accessibilityLabel: "Placement settings",
-      panelID: "placement-panel",
-    },
-  ];
-
-  // Render tab content
   const renderTabContent = () => {
     switch (selectedTab) {
       case 0:
@@ -267,7 +234,6 @@ export function TimerForm({
     }
   };
 
-  // Secondary actions (delete button for existing timers)
   const secondaryActions = timerId
     ? [
         {
@@ -280,66 +246,55 @@ export function TimerForm({
     : undefined;
 
   return (
-    <Page
-      title={timerId ? "Edit Timer" : "Create Timer"}
-      backAction={{
-        content: "Timers",
-        url: "/",
-      }}
-      secondaryActions={secondaryActions}
-      primaryAction={{
-        content: timerId ? "Update & Publish" : "Save & Publish",
-        loading: isSaving,
-        onAction: handlePublish,
-      }}
-    >
-      <Frame>
-        <InlineGrid
-          columns={{ xs: 1, lg: ["twoThirds", "oneThird"] }}
-          gap="400"
-        >
-          <Box>
-            <Card>
-              <Tabs
-                tabs={tabs}
-                selected={selectedTab}
-                onSelect={handleTabChange}
-              >
-                <Box padding="400">{renderTabContent()}</Box>
-              </Tabs>
-            </Card>
-
-            <Box paddingBlockStart="400">
-              <InlineStack align="end" gap="200">
-                {onCancel && (
-                  <Button onClick={onCancel} disabled={isSaving}>
-                    Cancel
-                  </Button>
-                )}
-                <Button onClick={handleSave} loading={isSaving}>
-                  Save as Draft
-                </Button>
-              </InlineStack>
-            </Box>
+    <Frame>
+      <Page
+        title={`${formState.timerName}`}
+        backAction={{
+          content: "Timers",
+          url: "/new",
+        }}
+        titleMetadata={
+          timerId ? <Badge>Published</Badge> : <Badge>Draft</Badge>
+        }
+        subtitle={timerId ? `Timer ID: ${timerId}` : "Save to show Timer ID"}
+        secondaryActions={secondaryActions}
+        primaryAction={{
+          content: timerId ? "Update" : "Publish",
+          loading: isSaving,
+          onAction: handlePublish,
+        }}
+      >
+        <Form method="post" data-save-bar onSubmit={handleSave}>
+          <Box paddingBlockEnd="800">
+            <Tabs tabs={tabs} selected={selectedTab} onSelect={handleTabChange}>
+              <Box paddingBlockStart="400">
+                <InlineGrid columns={{ xs: 1, lg: "2fr 3fr" }} gap="3200">
+                  <Box>
+                    <Card padding="400">{renderTabContent()}</Card>
+                  </Box>
+                  <Box>
+                    <TimerPreview
+                      title={formState.title}
+                      subheading={formState.subheading}
+                      daysLabel={formState.daysLabel}
+                      hoursLabel={formState.hoursLabel}
+                      minutesLabel={formState.minutesLabel}
+                      secondsLabel={formState.secondsLabel}
+                      designConfig={formState.designConfig}
+                      timerType={
+                        timerType === "product-page"
+                          ? "product"
+                          : "top-bottom-bar"
+                      }
+                      buttonText={formState.buttonText}
+                    />
+                  </Box>
+                </InlineGrid>
+              </Box>
+            </Tabs>
           </Box>
-
-          <Box>
-            <TimerPreview
-              title={formState.title}
-              subheading={formState.subheading}
-              daysLabel={formState.daysLabel}
-              hoursLabel={formState.hoursLabel}
-              minutesLabel={formState.minutesLabel}
-              secondsLabel={formState.secondsLabel}
-              designConfig={formState.designConfig}
-              timerType={
-                timerType === "product-page" ? "product" : "top-bottom-bar"
-              }
-              buttonText={formState.buttonText}
-            />
-          </Box>
-        </InlineGrid>
-      </Frame>
-    </Page>
+        </Form>
+      </Page>
+    </Frame>
   );
 }
