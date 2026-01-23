@@ -6,9 +6,6 @@ import {
   Card,
   InlineGrid,
   Frame,
-  InlineStack,
-  Button,
-  Form,
   Badge,
 } from "@shopify/polaris";
 import { useSubmit, useNavigation } from "@remix-run/react";
@@ -264,7 +261,7 @@ export function TimerForm({
           onAction: handlePublish,
         }}
       >
-        <Form method="post" data-save-bar onSubmit={handleSave}>
+        <form method="post" data-save-bar onSubmit={handleSave}>
           <Box paddingBlockEnd="800">
             <Tabs tabs={tabs} selected={selectedTab} onSelect={handleTabChange}>
               <Box paddingBlockStart="400">
@@ -293,7 +290,7 @@ export function TimerForm({
               </Box>
             </Tabs>
           </Box>
-        </Form>
+        </form>
       </Page>
     </Frame>
   );
