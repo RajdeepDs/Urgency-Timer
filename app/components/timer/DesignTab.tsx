@@ -10,7 +10,6 @@ import {
   Divider,
   Bleed,
 } from "@shopify/polaris";
-import { useRef, useEffect } from "react";
 import type { DesignConfig } from "../../types/timer";
 import { useDesignState } from "../../hooks/useDesignState";
 
@@ -32,14 +31,14 @@ export default function DesignTab({
     setPositioning,
     backgroundType,
     setBackgroundType,
-    bgColorText,
-    setBgColorText,
+    backgroundColor,
+    setBackgroundColor,
     borderRadius,
     setBorderRadius,
     borderSize,
     setBorderSize,
-    borderColorText,
-    setBorderColorText,
+    borderColor,
+    setBorderColor,
     insideTop,
     setInsideTop,
     insideBottom,
@@ -50,116 +49,36 @@ export default function DesignTab({
     setOutsideBottom,
     titleSize,
     setTitleSize,
-    titleColorText,
-    setTitleColorText,
+    titleColor,
+    setTitleColor,
     subheadingSize,
     setSubheadingSize,
-    subheadingColorText,
-    setSubheadingColorText,
+    subheadingColor,
+    setSubheadingColor,
     timerSize,
     setTimerSize,
-    timerColorText,
-    setTimerColorText,
+    timerColor,
+    setTimerColor,
     legendSize,
     setLegendSize,
-    legendColorText,
-    setLegendColorText,
+    legendColor,
+    setLegendColor,
     buttonFontSize,
     setButtonFontSize,
+    buttonColor,
+    setButtonColor,
+    buttonBackgroundColor,
+    setButtonBackgroundColor,
     cornerRadius,
     setCornerRadius,
-    buttonColorText,
-    setButtonColorText,
-    buttonBgColorText,
-    setButtonBgColorText,
   } = useDesignState({
     timerType,
     initialConfig: designConfig,
     onConfigChange: setDesignConfig,
   });
 
-  // Create refs for hidden inputs to trigger data-save-bar
-  const bgColorInputRef = useRef<HTMLInputElement>(null);
-  const borderColorInputRef = useRef<HTMLInputElement>(null);
-  const titleColorInputRef = useRef<HTMLInputElement>(null);
-  const subheadingColorInputRef = useRef<HTMLInputElement>(null);
-  const timerColorInputRef = useRef<HTMLInputElement>(null);
-  const legendColorInputRef = useRef<HTMLInputElement>(null);
-  const buttonColorInputRef = useRef<HTMLInputElement>(null);
-  const buttonBgColorInputRef = useRef<HTMLInputElement>(null);
-
-  // Trigger change events on hidden inputs when colors change
-  useEffect(() => {
-    if (bgColorInputRef.current) {
-      bgColorInputRef.current.value = bgColorText;
-      bgColorInputRef.current.dispatchEvent(
-        new Event("input", { bubbles: true }),
-      );
-    }
-  }, [bgColorText]);
-
-  useEffect(() => {
-    if (borderColorInputRef.current) {
-      borderColorInputRef.current.value = borderColorText;
-      borderColorInputRef.current.dispatchEvent(
-        new Event("input", { bubbles: true }),
-      );
-    }
-  }, [borderColorText]);
-
-  useEffect(() => {
-    if (titleColorInputRef.current) {
-      titleColorInputRef.current.value = titleColorText;
-      titleColorInputRef.current.dispatchEvent(
-        new Event("input", { bubbles: true }),
-      );
-    }
-  }, [titleColorText]);
-
-  useEffect(() => {
-    if (subheadingColorInputRef.current) {
-      subheadingColorInputRef.current.value = subheadingColorText;
-      subheadingColorInputRef.current.dispatchEvent(
-        new Event("input", { bubbles: true }),
-      );
-    }
-  }, [subheadingColorText]);
-
-  useEffect(() => {
-    if (timerColorInputRef.current) {
-      timerColorInputRef.current.value = timerColorText;
-      timerColorInputRef.current.dispatchEvent(
-        new Event("input", { bubbles: true }),
-      );
-    }
-  }, [timerColorText]);
-
-  useEffect(() => {
-    if (legendColorInputRef.current) {
-      legendColorInputRef.current.value = legendColorText;
-      legendColorInputRef.current.dispatchEvent(
-        new Event("input", { bubbles: true }),
-      );
-    }
-  }, [legendColorText]);
-
-  useEffect(() => {
-    if (buttonColorInputRef.current) {
-      buttonColorInputRef.current.value = buttonColorText;
-      buttonColorInputRef.current.dispatchEvent(
-        new Event("input", { bubbles: true }),
-      );
-    }
-  }, [buttonColorText]);
-
-  useEffect(() => {
-    if (buttonBgColorInputRef.current) {
-      buttonBgColorInputRef.current.value = buttonBgColorText;
-      buttonBgColorInputRef.current.dispatchEvent(
-        new Event("input", { bubbles: true }),
-      );
-    }
-  }, [buttonBgColorText]);
+  const getValue = (event: any) =>
+    event?.detail?.value ?? event?.target?.value ?? "";
 
   return (
     <FormLayout>
@@ -193,9 +112,9 @@ export default function DesignTab({
           {backgroundType === "single" && (
             <s-color-field
               name="bgColor"
-              value={bgColorText}
-              defaultValue={bgColorText}
-              onChange={() => setBgColorText}
+              value={backgroundColor}
+              defaultValue={backgroundColor}
+              onChange={(value) => setBackgroundColor(getValue(value))}
               autocomplete="off"
             />
           )}
@@ -205,7 +124,7 @@ export default function DesignTab({
             label="Border radius"
             value={borderRadius}
             defaultValue={borderRadius}
-            onChange={() => setBorderRadius}
+            onChange={(e) => setBorderRadius(getValue(e))}
             autocomplete="off"
             suffix="px"
             inputMode="numeric"
@@ -216,7 +135,7 @@ export default function DesignTab({
             label="Border size"
             value={borderSize}
             defaultValue={borderSize}
-            onChange={() => setBorderSize}
+            onChange={(e) => setBorderSize(getValue(e))}
             autocomplete="off"
             suffix="px"
             inputMode="numeric"
@@ -231,9 +150,9 @@ export default function DesignTab({
             </Text>
             <s-color-field
               name="borderColor"
-              value={borderColorText}
-              defaultValue={borderColorText}
-              onChange={() => setBorderColorText}
+              value={borderColor}
+              defaultValue={borderColor}
+              onChange={(e) => setBorderColor(getValue(e))}
               autocomplete="off"
             />
           </BlockStack>
@@ -251,7 +170,7 @@ export default function DesignTab({
                 label="Inside top"
                 value={insideTop}
                 defaultValue={insideTop}
-                onChange={() => setInsideTop}
+                onChange={(e) => setInsideTop(getValue(e))}
                 autocomplete="off"
                 suffix="px"
                 inputMode="numeric"
@@ -262,7 +181,7 @@ export default function DesignTab({
                 label="Inside bottom"
                 value={insideBottom}
                 defaultValue={insideBottom}
-                onChange={() => setInsideBottom}
+                onChange={(e) => setInsideBottom(getValue(e))}
                 autocomplete="off"
                 suffix="px"
                 inputMode="numeric"
@@ -276,7 +195,7 @@ export default function DesignTab({
                 label="Outside top"
                 value={outsideTop}
                 defaultValue={outsideTop}
-                onChange={() => setOutsideTop}
+                onChange={(e) => setOutsideTop(getValue(e))}
                 autocomplete="off"
                 suffix="px"
                 inputMode="numeric"
@@ -287,7 +206,7 @@ export default function DesignTab({
                 label="Outside bottom"
                 value={outsideBottom}
                 defaultValue={outsideBottom}
-                onChange={() => setOutsideBottom}
+                onChange={(e) => setOutsideBottom(getValue(e))}
                 autocomplete="off"
                 suffix="px"
                 inputMode="numeric"
@@ -301,6 +220,7 @@ export default function DesignTab({
       <Bleed marginInline={"400"}>
         <Divider />
       </Bleed>
+
       <BlockStack gap="400">
         <Text as="h4" variant="headingSm" fontWeight="semibold">
           Typography
@@ -309,13 +229,14 @@ export default function DesignTab({
           <Text as="p" variant="bodyMd">
             Title size and color
           </Text>
+
           <InlineStack gap="200" blockAlign="stretch" wrap={false}>
             <s-number-field
               label="Title size"
               labelAccessibilityVisibility="exclusive"
               value={titleSize}
               defaultValue={titleSize}
-              onChange={() => setTitleSize}
+              onChange={(e) => setTitleSize(getValue(e))}
               autocomplete="off"
               suffix="px"
               inputMode="numeric"
@@ -324,9 +245,9 @@ export default function DesignTab({
             />
             <s-color-field
               name="titleColor"
-              value={titleColorText}
-              defaultValue={titleColorText}
-              onChange={() => setTitleColorText}
+              value={titleColor}
+              defaultValue={titleColor}
+              onChange={(e) => setTitleColor(getValue(e))}
               autocomplete="off"
             />
           </InlineStack>
@@ -342,7 +263,7 @@ export default function DesignTab({
               labelAccessibilityVisibility="exclusive"
               value={subheadingSize}
               defaultValue={subheadingSize}
-              onChange={() => setSubheadingSize}
+              onChange={(e) => setSubheadingSize(getValue(e))}
               autocomplete="off"
               suffix="px"
               inputMode="numeric"
@@ -351,9 +272,9 @@ export default function DesignTab({
             />
             <s-color-field
               name="subHeadingColor"
-              value={subheadingColorText}
-              defaultValue={subheadingColorText}
-              onChange={() => setSubheadingColorText}
+              value={subheadingColor}
+              defaultValue={subheadingColor}
+              onChange={(e) => setSubheadingColor(getValue(e))}
               autocomplete="off"
             />
           </InlineStack>
@@ -369,7 +290,7 @@ export default function DesignTab({
               labelAccessibilityVisibility="exclusive"
               value={timerSize}
               defaultValue={timerSize}
-              onChange={() => setTimerSize}
+              onChange={(e) => setTimerSize(getValue(e))}
               autocomplete="off"
               suffix="px"
               inputMode="numeric"
@@ -378,9 +299,9 @@ export default function DesignTab({
             />
             <s-color-field
               name="timerColor"
-              value={timerColorText}
-              defaultValue={timerColorText}
-              onChange={() => setTimerColorText}
+              value={timerColor}
+              defaultValue={timerColor}
+              onChange={(e) => setTimerColor(getValue(e))}
               autocomplete="off"
             />
           </InlineStack>
@@ -396,7 +317,7 @@ export default function DesignTab({
               labelAccessibilityVisibility="exclusive"
               value={legendSize}
               defaultValue={legendSize}
-              onChange={() => setLegendSize}
+              onChange={(e) => setLegendSize(getValue(e))}
               autocomplete="off"
               suffix="px"
               inputMode="numeric"
@@ -405,9 +326,9 @@ export default function DesignTab({
             />
             <s-color-field
               name="legendColor"
-              value={legendColorText}
-              defaultValue={legendColorText}
-              onChange={() => setLegendColorText}
+              value={legendColor}
+              defaultValue={legendColor}
+              onChange={(e) => setLegendColor(getValue(e))}
               autocomplete="off"
             />
           </InlineStack>
@@ -423,9 +344,9 @@ export default function DesignTab({
           </Text>
           <s-color-field
             name="Button background color"
-            value={buttonBgColorText}
-            defaultValue={buttonBgColorText}
-            onChange={() => setButtonBgColorText}
+            value={buttonBackgroundColor}
+            defaultValue={buttonBackgroundColor}
+            onChange={(e) => setButtonBackgroundColor(getValue(e))}
             autocomplete="off"
           />
           <BlockStack gap="100">
@@ -438,7 +359,7 @@ export default function DesignTab({
                 labelAccessibilityVisibility="exclusive"
                 value={buttonFontSize}
                 defaultValue={buttonFontSize}
-                onChange={() => setButtonFontSize}
+                onChange={(e) => setButtonFontSize(getValue(e))}
                 autocomplete="off"
                 suffix="px"
                 inputMode="numeric"
@@ -448,9 +369,9 @@ export default function DesignTab({
               <s-color-field
                 name="Button Color"
                 labelAccessibilityVisibility="exclusive"
-                value={buttonColorText}
-                defaultValue={buttonColorText}
-                onChange={() => setButtonColorText}
+                value={buttonColor}
+                defaultValue={buttonColor}
+                onChange={(e) => setButtonColor(getValue(e))}
                 autocomplete="off"
               />
             </InlineStack>
@@ -461,7 +382,7 @@ export default function DesignTab({
                 label="Corner radius"
                 value={cornerRadius}
                 defaultValue={cornerRadius}
-                onChange={() => setCornerRadius}
+                onChange={(e) => setCornerRadius(getValue(e))}
                 autocomplete="off"
                 suffix="px"
                 inputMode="numeric"
