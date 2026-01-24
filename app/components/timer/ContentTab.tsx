@@ -8,7 +8,6 @@ import {
   Bleed,
   RadioButton,
   Button,
-  Select,
   Popover,
   DatePicker,
   FormLayout,
@@ -131,56 +130,62 @@ export default function ContentTab({
 
   return (
     <FormLayout>
-      <TextField
+      <s-text-field
         label="Countdown name"
         value={timerName}
-        onChange={setTimerName}
+        defaultValue={timerName}
+        onChange={() => setTimerName}
         placeholder="Timer name"
-        autoComplete="off"
-        helpText="Only visible to you. For your own internal reference."
+        autocomplete="off"
+        details="Only visible to you. For your own internal reference."
       />
-      <TextField
+      <s-text-field
         label="Title"
         value={title}
-        onChange={setTitle}
+        defaultValue={title}
+        onChange={() => setTitle}
         placeholder="Hurry up!"
-        autoComplete="off"
+        autocomplete="off"
       />
-      <TextField
+      <s-text-field
         label="Subheading"
         value={subheading}
-        onChange={setSubheading}
+        defaultValue={subheading}
+        onChange={() => setSubheading}
         placeholder="Sale ends in:"
-        autoComplete="off"
+        autocomplete="off"
       />
       {timerType === "top-bottom-bar" && callToAction && setCallToAction && (
         <BlockStack gap="400">
-          <Select
+          <s-select
             label="Call to action"
-            options={[
-              { label: "No call to action", value: "no" },
-              { label: "Button", value: "button" },
-              { label: "Make entire bar clickable", value: "clickable" },
-            ]}
             value={callToAction}
-            onChange={(value) => setCallToAction(value as CallToActionType)}
-          />
+            onChange={(value) =>
+              setCallToAction(value as unknown as CallToActionType)
+            }
+          >
+            <s-option value="no">No call to action</s-option>
+            <s-option value="button">Button</s-option>
+            <s-option value="clickable">Make entire bar clickable</s-option>
+          </s-select>
           {buttonText !== undefined && setButtonText && (
-            <TextField
+            <s-text-field
               label="Button Text"
               value={buttonText}
-              onChange={setButtonText}
+              defaultValue={buttonText}
+              onChange={() => setButtonText}
               placeholder="Shop now!"
-              autoComplete="off"
+              autocomplete="off"
             />
           )}
           {buttonLink !== undefined && setButtonLink && (
-            <TextField
+            <s-url-field
               label="Link"
-              value={buttonLink}
-              onChange={setButtonLink}
               placeholder="Enter link"
-              autoComplete="off"
+              autocomplete="off"
+              value={buttonLink}
+              defaultValue={buttonLink}
+              onChange={() => setButtonLink}
             />
           )}
         </BlockStack>
@@ -190,33 +195,37 @@ export default function ContentTab({
           Timer labels
         </Text>
         <InlineGrid gap="200" columns={4}>
-          <TextField
+          <s-text-field
             label="Days"
-            labelHidden
+            labelAccessibilityVisibility="exclusive"
             value={daysLabel}
-            onChange={setDaysLabel}
-            autoComplete="off"
+            defaultValue={daysLabel}
+            onChange={() => setDaysLabel}
+            autocomplete="off"
           />
-          <TextField
+          <s-text-field
             label="Hrs"
-            labelHidden
+            labelAccessibilityVisibility="exclusive"
             value={hoursLabel}
-            onChange={setHoursLabel}
-            autoComplete="off"
+            defaultValue={hoursLabel}
+            onChange={() => setHoursLabel}
+            autocomplete="off"
           />
-          <TextField
+          <s-text-field
             label="Mins"
-            labelHidden
+            labelAccessibilityVisibility="exclusive"
             value={minutesLabel}
-            onChange={setMinutesLabel}
-            autoComplete="off"
+            defaultValue={minutesLabel}
+            onChange={() => setMinutesLabel}
+            autocomplete="off"
           />
-          <TextField
+          <s-text-field
             label="Secs"
-            labelHidden
+            labelAccessibilityVisibility="exclusive"
             value={secondsLabel}
-            onChange={setSecondsLabel}
-            autoComplete="off"
+            defaultValue={secondsLabel}
+            onChange={() => setSecondsLabel}
+            autocomplete="off"
           />
         </InlineGrid>
       </BlockStack>
@@ -249,15 +258,13 @@ export default function ContentTab({
           </Box>
 
           {timerTypeValue === "fixed" && (
-            <TextField
+            <s-text-field
               label="Fixed minutes"
-              type="number"
               value={fixedMinutes}
-              onChange={setFixedMinutes}
-              min={1}
-              max={1440}
-              helpText="Enter the number of minutes for the countdown (1-1440)"
-              autoComplete="off"
+              defaultValue={fixedMinutes}
+              onChange={() => setFixedMinutes}
+              autocomplete="off"
+              details="Enter the number of minutes for the countdown (1-1440)"
             />
           )}
 
@@ -320,6 +327,7 @@ export default function ContentTab({
                   label="Hour"
                   labelAccessibilityVisibility="exclusive"
                   value={hour}
+                  defaultValue={hour}
                   onChange={() => setHour}
                   min={1}
                   max={12}
@@ -330,6 +338,7 @@ export default function ContentTab({
                   label="Minute"
                   labelAccessibilityVisibility="exclusive"
                   value={minute}
+                  defaultValue={minute}
                   onChange={() => setMinute}
                   min={0}
                   max={59}

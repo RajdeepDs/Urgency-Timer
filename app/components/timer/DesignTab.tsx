@@ -1,5 +1,4 @@
 import {
-  TextField,
   BlockStack,
   Text,
   Box,
@@ -8,16 +7,12 @@ import {
   RadioButton,
   InlineGrid,
   InlineStack,
-  Popover,
-  ColorPicker,
   Divider,
   Bleed,
-  Select,
 } from "@shopify/polaris";
 import { useRef, useEffect } from "react";
 import type { DesignConfig } from "../../types/timer";
 import { useDesignState } from "../../hooks/useDesignState";
-import { hsbToHex } from "../../utils/timer/color";
 
 interface DesignTabProps {
   timerType: "product" | "top-bottom-bar";
@@ -43,8 +38,6 @@ export default function DesignTab({
     setBorderRadius,
     borderSize,
     setBorderSize,
-    borderColor,
-    toggleBorderColorPopover,
     borderColorText,
     setBorderColorText,
     insideTop,
@@ -75,19 +68,10 @@ export default function DesignTab({
     setButtonFontSize,
     cornerRadius,
     setCornerRadius,
-    buttonColor,
-    setButtonColor,
-    buttonBackgroundColor,
-    setButtonBackgroundColor,
-    buttonColorPopover,
-    toggleButtonColorPopover,
-    buttonBgColorPopover,
-    toggleButtonBgColorPopover,
     buttonColorText,
     setButtonColorText,
     buttonBgColorText,
     setButtonBgColorText,
-    handleHexChange,
   } = useDesignState({
     timerType,
     initialConfig: designConfig,
@@ -181,15 +165,14 @@ export default function DesignTab({
     <FormLayout>
       {timerType === "top-bottom-bar" && (
         <BlockStack gap="400">
-          <Select
+          <s-select
             label="Positioning"
-            options={[
-              { label: "Top page", value: "top" },
-              { label: "Bottom page", value: "bottom" },
-            ]}
             value={positioning}
             onChange={(value) => setPositioning(value as any)}
-          />
+          >
+            <s-option value="top">Top page</s-option>
+            <s-option value="bottom">Bottom page</s-option>
+          </s-select>
           <Bleed marginInline={"400"}>
             <Divider />
           </Bleed>
@@ -438,114 +421,53 @@ export default function DesignTab({
           <Text as="h4" variant="headingSm" fontWeight="semibold">
             Button
           </Text>
-          <BlockStack gap="100">
-            <Text as="p" variant="bodyMd">
-              Button background color
-            </Text>
-            <InlineStack gap="200" blockAlign="stretch" wrap={false}>
-              <Popover
-                active={buttonBgColorPopover}
-                activator={
-                  <button
-                    type="button"
-                    onClick={toggleBorderColorPopover}
-                    style={{ backgroundColor: hsbToHex(borderColor) }}
-                    className="min-h-8 min-w-11 border border-[#e1e3e5] cursor-pointer rounded-md"
-                  />
-                }
-                onClose={toggleButtonBgColorPopover}
-              >
-                <Box padding="200">
-                  <ColorPicker
-                    color={buttonBackgroundColor}
-                    onChange={setButtonBackgroundColor}
-                  />
-                </Box>
-              </Popover>
-              <Box width="100%">
-                <TextField
-                  label="Button background color"
-                  labelHidden
-                  value={buttonBgColorText}
-                  onChange={setButtonBgColorText}
-                  onBlur={() =>
-                    handleHexChange(
-                      buttonBgColorText,
-                      setButtonBackgroundColor,
-                      setButtonBgColorText,
-                    )
-                  }
-                  autoComplete="off"
-                />
-              </Box>
-            </InlineStack>
-          </BlockStack>
+          <s-color-field
+            name="Button background color"
+            value={buttonBgColorText}
+            defaultValue={buttonBgColorText}
+            onChange={() => setButtonBgColorText}
+            autocomplete="off"
+          />
           <BlockStack gap="100">
             <Text as="p" variant="bodyMd">
               Button font size and color
             </Text>
             <InlineStack gap="200" blockAlign="stretch" wrap={false}>
-              <div style={{ width: "110px" }}>
-                <TextField
-                  label="Button font size"
-                  labelHidden
-                  value={buttonFontSize}
-                  onChange={setButtonFontSize}
-                  autoComplete="off"
-                  suffix="px"
-                  type="number"
-                />
-              </div>
-              <Popover
-                active={buttonColorPopover}
-                activator={
-                  <button
-                    type="button"
-                    onClick={toggleButtonColorPopover}
-                    style={{ backgroundColor: hsbToHex(buttonColor) }}
-                    className="min-h-8 min-w-11 border border-[#e1e3e5] cursor-pointer rounded-md shrink-0"
-                  />
-                }
-                onClose={toggleButtonColorPopover}
-              >
-                <Box padding="200">
-                  <ColorPicker color={buttonColor} onChange={setButtonColor} />
-                </Box>
-              </Popover>
-              <div className="flex-1">
-                <TextField
-                  label="Button color"
-                  labelHidden
-                  value={buttonColorText}
-                  onChange={setButtonColorText}
-                  onBlur={() =>
-                    handleHexChange(
-                      buttonColorText,
-                      setButtonColor,
-                      setButtonColorText,
-                    )
-                  }
-                  autoComplete="off"
-                />
-              </div>
+              <s-number-field
+                label="Button font size"
+                labelAccessibilityVisibility="exclusive"
+                value={buttonFontSize}
+                defaultValue={buttonFontSize}
+                onChange={() => setButtonFontSize}
+                autocomplete="off"
+                suffix="px"
+                inputMode="numeric"
+                min={0}
+                max={100}
+              />
+              <s-color-field
+                name="Button Color"
+                labelAccessibilityVisibility="exclusive"
+                value={buttonColorText}
+                defaultValue={buttonColorText}
+                onChange={() => setButtonColorText}
+                autocomplete="off"
+              />
             </InlineStack>
           </BlockStack>
           <BlockStack gap="100">
-            <Text as="p" variant="bodyMd">
-              Corner radius
-            </Text>
             <InlineStack gap="200" blockAlign="stretch" wrap={false}>
-              <div style={{ width: "110px" }}>
-                <TextField
-                  label="Corner radius"
-                  labelHidden
-                  value={cornerRadius}
-                  onChange={setCornerRadius}
-                  autoComplete="off"
-                  suffix="px"
-                  type="number"
-                />
-              </div>
+              <s-number-field
+                label="Corner radius"
+                value={cornerRadius}
+                defaultValue={cornerRadius}
+                onChange={() => setCornerRadius}
+                autocomplete="off"
+                suffix="px"
+                inputMode="numeric"
+                min={0}
+                max={100}
+              />
             </InlineStack>
           </BlockStack>
         </BlockStack>
