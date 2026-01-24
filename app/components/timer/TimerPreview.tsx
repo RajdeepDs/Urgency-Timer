@@ -1,5 +1,5 @@
-import { Box, BlockStack, Card } from "@shopify/polaris";
 import type { DesignConfig } from "../../types/timer";
+import { cn } from "../../utils/cn";
 
 interface TimerPreviewProps {
   title: string;
@@ -46,6 +46,7 @@ export default function TimerPreview({
     buttonBackgroundColor = "#5c6ac4",
   } = designConfig;
 
+  // Simple CSS (inline) for primary styling
   const cardStyle: React.CSSProperties = {
     backgroundColor,
     borderRadius: `${borderRadius}px`,
@@ -94,117 +95,105 @@ export default function TimerPreview({
 
   if (timerType === "top-bottom-bar") {
     return (
-      <Box position="sticky" insetBlockStart="400">
-        <Card padding="0">
-          <div
-            style={{
-              ...cardStyle,
-              padding: "16px 24px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: "16px",
-            }}
-          >
-            <div style={{ flex: 1 }}>
-              <div style={titleStyle}>{title || "Hurry up!"}</div>
-              <div style={{ ...subheadingStyle, marginTop: "4px" }}>
-                {subheading || "Sale ends in:"}
-              </div>
-            </div>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                flexShrink: 0,
-              }}
-            >
-              <div style={{ textAlign: "center" }}>
-                <div style={timerDigitStyle}>00</div>
-                <div style={{ ...legendStyle, marginTop: "2px" }}>
-                  {daysLabel}
-                </div>
-              </div>
-              <div style={timerDigitStyle}>:</div>
-              <div style={{ textAlign: "center" }}>
-                <div style={timerDigitStyle}>23</div>
-                <div style={{ ...legendStyle, marginTop: "2px" }}>
-                  {hoursLabel}
-                </div>
-              </div>
-              <div style={timerDigitStyle}>:</div>
-              <div style={{ textAlign: "center" }}>
-                <div style={timerDigitStyle}>59</div>
-                <div style={{ ...legendStyle, marginTop: "2px" }}>
-                  {minutesLabel}
-                </div>
-              </div>
-              <div style={timerDigitStyle}>:</div>
-              <div style={{ textAlign: "center" }}>
-                <div style={timerDigitStyle}>53</div>
-                <div style={{ ...legendStyle, marginTop: "2px" }}>
-                  {secondsLabel}
-                </div>
-              </div>
-            </div>
-            <button style={buttonStyle}>{buttonText}</button>
+      <div
+        style={{
+          ...cardStyle,
+          // Use inline CSS for spacing/box
+          paddingLeft: "24px",
+          paddingRight: "24px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: "16px",
+        }}
+        className="select-none"
+      >
+        <div style={{ flex: 1 }}>
+          <div style={titleStyle}>{title || "Hurry up!"}</div>
+          <div style={{ ...subheadingStyle, marginTop: "4px" }}>
+            {subheading || "Sale ends in:"}
           </div>
-        </Card>
-      </Box>
+        </div>
+        <div
+          className={cn("flex items-center gap-2 shrink-0")}
+          // layout by Tailwind, content styles inline
+        >
+          <div style={{ textAlign: "center" }}>
+            <div style={timerDigitStyle}>00</div>
+            <div style={{ ...legendStyle, marginTop: "2px" }}>{daysLabel}</div>
+          </div>
+          <div style={timerDigitStyle} className={cn("-translate-y-3.5")}>
+            :
+          </div>
+          <div style={{ textAlign: "center" }}>
+            <div style={timerDigitStyle}>23</div>
+            <div style={{ ...legendStyle, marginTop: "2px" }}>{hoursLabel}</div>
+          </div>
+          <div style={timerDigitStyle} className={cn("-translate-y-3.5")}>
+            :
+          </div>
+          <div style={{ textAlign: "center" }}>
+            <div style={timerDigitStyle}>59</div>
+            <div style={{ ...legendStyle, marginTop: "2px" }}>
+              {minutesLabel}
+            </div>
+          </div>
+          <div style={timerDigitStyle} className={cn("-translate-y-3.5")}>
+            :
+          </div>
+          <div style={{ textAlign: "center" }}>
+            <div style={timerDigitStyle}>53</div>
+            <div style={{ ...legendStyle, marginTop: "2px" }}>
+              {secondsLabel}
+            </div>
+          </div>
+        </div>
+        <button style={buttonStyle}>{buttonText}</button>
+      </div>
     );
   }
 
   return (
-    <Box position="sticky" insetBlockStart="400">
-      <Card padding="0">
-        <div style={cardStyle}>
-          <BlockStack gap="400" align="center">
-            <div style={{ ...titleStyle, textAlign: "center" }}>
-              {title || "Hurry up!"}
-            </div>
-            <div style={{ ...subheadingStyle, textAlign: "center" }}>
-              {subheading || "Sale ends in:"}
-            </div>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "12px",
-                justifyContent: "center",
-              }}
-            >
-              <div style={{ textAlign: "center" }}>
-                <div style={timerDigitStyle}>00</div>
-                <div style={{ ...legendStyle, marginTop: "4px" }}>
-                  {daysLabel}
-                </div>
-              </div>
-              <div style={timerDigitStyle}>:</div>
-              <div style={{ textAlign: "center" }}>
-                <div style={timerDigitStyle}>23</div>
-                <div style={{ ...legendStyle, marginTop: "4px" }}>
-                  {hoursLabel}
-                </div>
-              </div>
-              <div style={timerDigitStyle}>:</div>
-              <div style={{ textAlign: "center" }}>
-                <div style={timerDigitStyle}>59</div>
-                <div style={{ ...legendStyle, marginTop: "4px" }}>
-                  {minutesLabel}
-                </div>
-              </div>
-              <div style={timerDigitStyle}>:</div>
-              <div style={{ textAlign: "center" }}>
-                <div style={timerDigitStyle}>53</div>
-                <div style={{ ...legendStyle, marginTop: "4px" }}>
-                  {secondsLabel}
-                </div>
-              </div>
-            </div>
-          </BlockStack>
+    <div style={cardStyle} className={cn("sticky select-none")}>
+      <div className="flex items-center flex-col gap-0.5">
+        <div style={{ ...titleStyle, textAlign: "center" }}>
+          {title || "Hurry up!"}
         </div>
-      </Card>
-    </Box>
+        <div style={{ ...subheadingStyle, textAlign: "center" }}>
+          {subheading || "Sale ends in:"}
+        </div>
+        <div className={cn("flex items-center gap-1 justify-center")}>
+          <div style={{ textAlign: "center" }}>
+            <div style={timerDigitStyle}>00</div>
+            <div style={{ ...legendStyle, marginTop: "4px" }}>{daysLabel}</div>
+          </div>
+          <div style={timerDigitStyle} className={cn("-translate-y-3.5")}>
+            :
+          </div>
+          <div style={{ textAlign: "center" }}>
+            <div style={timerDigitStyle}>23</div>
+            <div style={{ ...legendStyle, marginTop: "4px" }}>{hoursLabel}</div>
+          </div>
+          <div style={timerDigitStyle} className={cn("-translate-y-3.5")}>
+            :
+          </div>
+          <div style={{ textAlign: "center" }}>
+            <div style={timerDigitStyle}>59</div>
+            <div style={{ ...legendStyle, marginTop: "4px" }}>
+              {minutesLabel}
+            </div>
+          </div>
+          <div style={timerDigitStyle} className={cn("-translate-y-3.5")}>
+            :
+          </div>
+          <div style={{ textAlign: "center" }}>
+            <div style={timerDigitStyle}>53</div>
+            <div style={{ ...legendStyle, marginTop: "4px" }}>
+              {secondsLabel}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
