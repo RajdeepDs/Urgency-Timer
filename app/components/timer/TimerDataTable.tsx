@@ -1,3 +1,4 @@
+import { Button } from "@shopify/polaris";
 import { StatusBadge } from "../ui/StatusBadge";
 import type { Timer } from "../../types/timer";
 
@@ -6,7 +7,7 @@ interface TimerDataTableProps {
   onTimerClick?: (timerId: string) => void;
 }
 
-export function TimerDataTable({ timers }: TimerDataTableProps) {
+export function TimerDataTable({ timers, onTimerClick }: TimerDataTableProps) {
   return (
     <s-section padding="none">
       <s-table>
@@ -18,7 +19,15 @@ export function TimerDataTable({ timers }: TimerDataTableProps) {
         <s-table-body>
           {timers.map((timer) => (
             <s-table-row key={timer.id}>
-              <s-table-cell>{timer.name}</s-table-cell>
+              <s-table-cell>
+                <Button
+                  variant="plain"
+                  onClick={() => onTimerClick?.(timer.id)}
+                  textAlign="left"
+                >
+                  {timer.name}
+                </Button>
+              </s-table-cell>
               <s-table-cell>{timer.type}</s-table-cell>
               <s-table-cell>
                 <StatusBadge isPublished={timer.isPublished} />
