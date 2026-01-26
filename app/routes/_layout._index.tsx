@@ -43,13 +43,13 @@ export default function Index() {
   const { shop, timers } = useLoaderData<typeof loader>();
 
   const planLimits: Record<string, number> = {
-    Free: 1000,
+    free: 1000,
     starter: 10000,
     essential: 50000,
     professional: -1,
   };
 
-  const limit = planLimits[shop?.currentPlan || "Free"];
+  const limit = planLimits[(shop?.currentPlan || "free").toLowerCase()];
   const usageText =
     limit === -1
       ? `${shop?.monthlyViews || 0} views this month`
@@ -88,7 +88,8 @@ export default function Index() {
           <Text as="h2" variant="bodyMd">
             You're currently on{" "}
             <Text as="span" variant="headingSm">
-              {shop?.currentPlan || "Free"} Plan.
+              <span className="capitalize">{shop?.currentPlan || "Free"}</span>{" "}
+              Plan.
             </Text>{" "}
             ({usageText}). One visitor can have multiple views per session.
           </Text>

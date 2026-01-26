@@ -14,7 +14,7 @@ export async function ensureShopExists(shopDomain: string) {
     shop = await prisma.shop.create({
       data: {
         shopDomain,
-        currentPlan: "Free",
+        currentPlan: "free",
         monthlyViews: 0,
         viewsResetAt: new Date(),
         billingStatus: "active",
@@ -100,7 +100,7 @@ export async function hasExceededViewLimit(
     professional: -1, // unlimited
   };
 
-  const limit = limits[shop.currentPlan as keyof typeof limits];
+  const limit = limits[shop.currentPlan?.toLowerCase() as keyof typeof limits];
 
   if (limit === -1) return false; // unlimited
 
@@ -121,7 +121,7 @@ export async function updateShopPlan(
   return await prisma.shop.update({
     where: { shopDomain },
     data: {
-      currentPlan: plan,
+      currentPlan: plan.toLowerCase(),
       subscriptionId: subscriptionId || null,
       planStartDate: new Date(),
       monthlyViews: 0,
