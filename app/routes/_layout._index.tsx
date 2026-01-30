@@ -1,5 +1,6 @@
-import type { LoaderFunctionArgs } from "@remix-run/node";
-import { useLoaderData, useNavigate } from "@remix-run/react";
+import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
+import { json } from "@remix-run/node";
+import { useLoaderData, useNavigate, useSubmit } from "@remix-run/react";
 import {
   Page,
   Text,
@@ -17,6 +18,58 @@ import prisma from "app/db.server";
 import { EmptyState } from "../components/ui/EmptyState";
 import { TimerDataTable } from "../components/timer/TimerDataTable";
 import { ensureShopExists } from "app/utils/shop.server";
+
+export const action = async ({ request }: ActionFunctionArgs) => {
+  const { session } = await authenticate.admin(request);
+  const formData = await request.formData();
+  const intent = formData.get("intent");
+  const timerId = formData.get("timerId") as string;
+
+  try {
+    if (intent === "delete") {
+      // Delete the timer
+      await prisma.timer.delete({
+        where: {
+          id: timerId,
+          shop: session.shop, // Ensure user can only delete their own timers
+        },
+      });
+
+      return json({ success: true, message: "Timer deleted successfully" });
+    }
+
+    if (intent === "togglePublish") {
+      // Get current timer
+      const timer = await prisma.timer.findUnique({
+        where: { id: timerId, shop: session.shop },
+        select: { isPublished: true },
+      });
+
+      if (!timer) {
+        return json(
+          { success: false, error: "Timer not found" },
+          { status: 404 },
+        );
+      }
+
+      // Toggle publish status
+      await prisma.timer.update({
+        where: { id: timerId },
+        data: { isPublished: !timer.isPublished },
+      });
+
+      return json({ success: true, message: "Timer status updated" });
+    }
+
+    return json({ success: false, error: "Invalid intent" }, { status: 400 });
+  } catch (error) {
+    console.error("Error in timer action:", error);
+    return json(
+      { success: false, error: "Failed to perform action" },
+      { status: 500 },
+    );
+  }
+};
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { session } = await authenticate.admin(request);
@@ -40,6 +93,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
 export default function Index() {
   const navigate = useNavigate();
+  const submit = useSubmit();
   const { shop, timers } = useLoaderData<typeof loader>();
 
   const planLimits: Record<string, number> = {
@@ -58,6 +112,22 @@ export default function Index() {
   const handleCreateTimer = () => navigate("/new");
   const handleTimerClick = (timerId: string) =>
     navigate(`/timer?id=${timerId}`);
+
+  const handleDeleteTimer = (timerId: string) => {
+    if (confirm("Are you sure you want to delete this timer?")) {
+      const formData = new FormData();
+      formData.append("intent", "delete");
+      formData.append("timerId", timerId);
+      submit(formData, { method: "post" });
+    }
+  };
+
+  const handleTogglePublish = (timerId: string) => {
+    const formData = new FormData();
+    formData.append("intent", "togglePublish");
+    formData.append("timerId", timerId);
+    submit(formData, { method: "post" });
+  };
 
   return (
     <Page>
@@ -103,7 +173,12 @@ export default function Index() {
             onAction={handleCreateTimer}
           />
         ) : (
-          <TimerDataTable timers={timers} onTimerClick={handleTimerClick} />
+          <TimerDataTable
+            timers={timers}
+            onTimerClick={handleTimerClick}
+            onDelete={handleDeleteTimer}
+            onTogglePublish={handleTogglePublish}
+          />
         )}
       </BlockStack>
     </Page>

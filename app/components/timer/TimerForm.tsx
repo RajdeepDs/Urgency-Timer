@@ -117,7 +117,7 @@ export function TimerForm({
       formData.append("intent", publish ? "publish" : "save");
 
       submit(formData, {
-        method: timerId ? "PUT" : "POST",
+        method: "POST",
         action: timerId ? `/timer?id=${timerId}` : "/timer",
       });
     },
@@ -252,7 +252,7 @@ export function TimerForm({
         title={`${formState.timerName}`}
         backAction={{
           content: "Timers",
-          url: "/new",
+          url: "/",
         }}
         titleMetadata={
           timerId ? <Badge>Published</Badge> : <Badge>Draft</Badge>
@@ -269,7 +269,8 @@ export function TimerForm({
           onAction: handlePublish,
         }}
       >
-        <form method="post" data-save-bar onSubmit={handleSave}>
+        <form method="post" onSubmit={handleSave}>
+          {" "}
           <Box paddingBlockEnd="800">
             <Tabs tabs={tabs} selected={selectedTab} onSelect={handleTabChange}>
               <Box paddingBlockStart="400">

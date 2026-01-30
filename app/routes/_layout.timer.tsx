@@ -123,7 +123,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         },
       });
 
-      return json({ timer: timer as any, success: true });
+      // Redirect to same page to show updated data and dismiss save bar
+      return redirect(`/timer?id=${timer.id}`);
     } else {
       // Create new timer
       const timer = await db.timer.create({
@@ -177,7 +178,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         },
       });
 
-      return json({ timer: timer as any, success: true });
+      // Redirect to timer edit page with the new timer ID
+      return redirect(`/timer?id=${timer.id}`);
     }
   } catch (error) {
     console.error("Error saving timer:", error);
