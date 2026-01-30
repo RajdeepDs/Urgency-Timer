@@ -25,7 +25,7 @@
  */
 
 (() => {
-  const DEBUG = false;
+  const DEBUG = true;
 
   const STATE = {
     fetched: false,
@@ -34,7 +34,7 @@
   };
 
  // change to "/apps/urgency-timer/timers" when deployed to production
-  const DEFAULT_ENDPOINT = "https://organizational-next-usa-convenient.trycloudflare.com/public/timers";
+  const DEFAULT_ENDPOINT = "https://corrected-reflected-intervals-rachel.trycloudflare.com/public/timers";
 
   function log(...args) {
     if (DEBUG) console.log("[UrgencyTimer]", ...args);
@@ -648,8 +648,20 @@
 
     bars.forEach((t) => {
       try {
+        // Check if user has dismissed this bar timer (localStorage)
+        const dismissKey = `utimer-dismissed-${t.id}`;
+        try {
+          if (localStorage.getItem(dismissKey)) {
+            log(`Bar timer ${t.id} was dismissed, skipping`);
+            return;
+          }
+        } catch (e) {
+          // localStorage not available, proceed anyway
+        }
+
         const bar = document.createElement("div");
         bar.className = "utimer-bar";
+        bar.setAttribute("data-timer-id", t.id);
 
         // Positioning
         const positioning = (t.designConfig?.positioning || "top").toLowerCase();
@@ -668,6 +680,12 @@
         close.className = "utimer-close";
         close.textContent = "×";
         close.addEventListener("click", () => {
+          // Save dismissal to localStorage
+          try {
+            localStorage.setItem(dismissKey, "1");
+          } catch (e) {
+            // Ignore localStorage errors
+          }
           bar.remove();
         });
         bar.appendChild(close);

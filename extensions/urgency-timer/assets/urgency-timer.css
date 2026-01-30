@@ -38,7 +38,9 @@
   border-radius: var(--utimer-radius);
   background: var(--utimer-bg);
   color: var(--utimer-fg);
-  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, Helvetica,
+    Arial, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
 }
 
 /* Typography */
@@ -96,7 +98,9 @@
   text-decoration: none;
   font-weight: 600;
   border: 1px solid transparent;
-  transition: filter 0.15s ease, transform 0.02s ease;
+  transition:
+    filter 0.15s ease,
+    transform 0.02s ease;
 }
 
 .utimer-button:hover {
@@ -112,15 +116,19 @@
   position: fixed;
   left: 0;
   right: 0;
-  padding: max(10px, env(safe-area-inset-top)) 16px;
+  padding: max(12px, env(safe-area-inset-top)) 20px;
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 16px;
   z-index: 2147483000; /* higher than most sticky headers and apps */
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   background: #f9fafb; /* fallback; JS may override */
   color: var(--utimer-fg);
+  transition: transform 0.3s ease-in-out;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif;
 }
 
 .utimer-bar.top {
@@ -137,16 +145,22 @@
 .utimer-bar .utimer-close {
   position: absolute;
   right: 12px;
-  top: 8px;
+  top: 50%;
+  transform: translateY(-50%);
   cursor: pointer;
-  font-size: 18px;
+  font-size: 22px;
   line-height: 1;
   user-select: none;
   color: var(--utimer-muted);
+  padding: 4px;
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .utimer-bar .utimer-close:hover {
   color: var(--utimer-fg);
+  transform: translateY(-50%) scale(1.1);
 }
 
 /* Neutralize container visuals when mounted inside a bar */
@@ -158,24 +172,68 @@
   padding: 0;
 }
 
+/* Bar specific styling */
+.utimer-bar .utimer-container {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.utimer-bar .utimer-countdown {
+  margin: 0;
+}
+
+.utimer-bar .utimer-cta {
+  margin: 0;
+}
+
 /* Responsiveness */
+@media (max-width: 768px) {
+  .utimer-bar {
+    padding-right: 44px; /* Make room for close button */
+  }
+
+  .utimer-bar .utimer-container {
+    gap: 12px;
+  }
+}
+
 @media (max-width: 480px) {
   :root {
-    --utimer-title-size: 16px;
-    --utimer-sub-size: 13px;
-    --utimer-number-size: 20px;
-    --utimer-label-size: 11px;
-    --utimer-gap: 10px;
+    --utimer-title-size: 15px;
+    --utimer-sub-size: 12px;
+    --utimer-number-size: 18px;
+    --utimer-label-size: 10px;
+    --utimer-gap: 8px;
   }
 
   .utimer-unit {
-    min-width: 50px;
+    min-width: 46px;
   }
 
   .utimer-bar {
-    gap: 12px;
-    padding-left: 12px;
-    padding-right: 12px;
+    gap: 10px;
+    padding: 10px 40px 10px 12px;
+    flex-wrap: wrap;
+  }
+
+  .utimer-bar .utimer-title {
+    font-size: 14px;
+  }
+
+  .utimer-bar .utimer-sub {
+    display: none; /* Hide subheading on mobile bars to save space */
+  }
+
+  .utimer-bar .utimer-close {
+    font-size: 20px;
+    right: 8px;
+  }
+
+  .utimer-bar .utimer-button {
+    padding: 6px 10px;
+    font-size: 13px;
   }
 }
 
@@ -204,7 +262,7 @@
   .utimer-bar {
     background: #0f1113;
     color: #e5e7eb;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
   }
 
   .utimer-button {
