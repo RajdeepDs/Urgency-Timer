@@ -331,6 +331,10 @@ export function TimerForm({
                           : "top-bottom-bar"
                       }
                       buttonText={formState.buttonText}
+                      endDate={formState.endDate}
+                      hour={formState.hour}
+                      minute={formState.minute}
+                      period={formState.period}
                     />
                   </Box>
                 </div>

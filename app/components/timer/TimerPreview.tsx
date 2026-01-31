@@ -1,3 +1,4 @@
+import { useState, useEffect, useCallback } from "react";
 import type { DesignConfig } from "../../types/timer";
 import { cn } from "../../utils/cn";
 
@@ -11,6 +12,10 @@ interface TimerPreviewProps {
   designConfig?: DesignConfig;
   timerType?: "product" | "top-bottom-bar";
   buttonText?: string;
+  endDate?: Date;
+  hour?: string;
+  minute?: string;
+  period?: "AM" | "PM";
 }
 
 export default function TimerPreview({
@@ -23,7 +28,67 @@ export default function TimerPreview({
   designConfig = {},
   timerType = "product",
   buttonText = "Shop now!",
+  endDate,
+  hour = "12",
+  minute = "00",
+  period = "AM",
 }: TimerPreviewProps) {
+  // Calculate target end date/time
+  const getTargetDate = useCallback(() => {
+    if (!endDate) {
+      // Default to 24 hours from now
+      const defaultDate = new Date();
+      defaultDate.setHours(defaultDate.getHours() + 24);
+      return defaultDate;
+    }
+
+    const target = new Date(endDate);
+    let hours = parseInt(hour) || 12;
+
+    // Convert 12-hour to 24-hour format
+    if (period === "PM" && hours !== 12) {
+      hours += 12;
+    } else if (period === "AM" && hours === 12) {
+      hours = 0;
+    }
+
+    target.setHours(hours, parseInt(minute) || 0, 0, 0);
+    return target;
+  }, [endDate, hour, minute, period]);
+
+  // Calculate time left
+  const calculateTimeLeft = useCallback(() => {
+    const target = getTargetDate();
+    const now = new Date();
+    const difference = target.getTime() - now.getTime();
+
+    if (difference <= 0) {
+      return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+    }
+
+    const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
+    const minutes = Math.floor((difference / 1000 / 60) % 60);
+    const seconds = Math.floor((difference / 1000) % 60);
+
+    return { days, hours, minutes, seconds };
+  }, [getTargetDate]);
+
+  // Live countdown timer state
+  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
+
+  // Update timer every second
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimeLeft(calculateTimeLeft());
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [calculateTimeLeft]);
+
+  // Format numbers to always be 2 digits
+  const formatTime = (num: number) => String(num).padStart(2, "0");
+
   // Extract design config values with defaults
   const {
     backgroundColor = "#ffffff",
@@ -126,7 +191,7 @@ export default function TimerPreview({
           {/* Timer - Horizontal layout with colons */}
           <div className={cn("flex items-start gap-1 shrink-0")}>
             <div style={{ textAlign: "center" }}>
-              <div style={timerDigitStyle}>00</div>
+              <div style={timerDigitStyle}>{formatTime(timeLeft.days)}</div>
               <div style={{ ...legendStyle, marginTop: "2px" }}>
                 {daysLabel}
               </div>
@@ -135,7 +200,7 @@ export default function TimerPreview({
               :
             </div>
             <div style={{ textAlign: "center" }}>
-              <div style={timerDigitStyle}>23</div>
+              <div style={timerDigitStyle}>{formatTime(timeLeft.hours)}</div>
               <div style={{ ...legendStyle, marginTop: "2px" }}>
                 {hoursLabel}
               </div>
@@ -144,7 +209,7 @@ export default function TimerPreview({
               :
             </div>
             <div style={{ textAlign: "center" }}>
-              <div style={timerDigitStyle}>59</div>
+              <div style={timerDigitStyle}>{formatTime(timeLeft.minutes)}</div>
               <div style={{ ...legendStyle, marginTop: "2px" }}>
                 {minutesLabel}
               </div>
@@ -153,7 +218,7 @@ export default function TimerPreview({
               :
             </div>
             <div style={{ textAlign: "center" }}>
-              <div style={timerDigitStyle}>13</div>
+              <div style={timerDigitStyle}>{formatTime(timeLeft.seconds)}</div>
               <div style={{ ...legendStyle, marginTop: "2px" }}>
                 {secondsLabel}
               </div>
@@ -186,21 +251,21 @@ export default function TimerPreview({
         </div>
         <div className={cn("flex items-center gap-1 justify-center")}>
           <div style={{ textAlign: "center" }}>
-            <div style={timerDigitStyle}>00</div>
+            <div style={timerDigitStyle}>{formatTime(timeLeft.days)}</div>
             <div style={{ ...legendStyle, marginTop: "4px" }}>{daysLabel}</div>
           </div>
           <div style={timerDigitStyle} className={cn("-translate-y-3.5")}>
             :
           </div>
           <div style={{ textAlign: "center" }}>
-            <div style={timerDigitStyle}>23</div>
+            <div style={timerDigitStyle}>{formatTime(timeLeft.hours)}</div>
             <div style={{ ...legendStyle, marginTop: "4px" }}>{hoursLabel}</div>
           </div>
           <div style={timerDigitStyle} className={cn("-translate-y-3.5")}>
             :
           </div>
           <div style={{ textAlign: "center" }}>
-            <div style={timerDigitStyle}>59</div>
+            <div style={timerDigitStyle}>{formatTime(timeLeft.minutes)}</div>
             <div style={{ ...legendStyle, marginTop: "4px" }}>
               {minutesLabel}
             </div>
@@ -209,7 +274,7 @@ export default function TimerPreview({
             :
           </div>
           <div style={{ textAlign: "center" }}>
-            <div style={timerDigitStyle}>53</div>
+            <div style={timerDigitStyle}>{formatTime(timeLeft.seconds)}</div>
             <div style={{ ...legendStyle, marginTop: "4px" }}>
               {secondsLabel}
             </div>
