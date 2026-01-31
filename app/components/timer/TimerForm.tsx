@@ -7,6 +7,9 @@ import {
   InlineGrid,
   Frame,
   Badge,
+  Modal,
+  Text,
+  BlockStack,
 } from "@shopify/polaris";
 import { useSubmit, useNavigation } from "@remix-run/react";
 import { useTimerForm } from "../../hooks/useTimerForm";
@@ -61,6 +64,7 @@ export function TimerForm({
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>(
     [],
   );
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const handleSubmit = useCallback(
     async (publish: boolean = false) => {
@@ -157,13 +161,12 @@ export function TimerForm({
     handleSubmit(false);
   }, [handleSubmit]);
 
-  const handleDelete = useCallback(() => {
-    if (!timerId) return;
+  const handleDeleteClick = useCallback(() => {
+    setShowDeleteModal(true);
+  }, []);
 
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this timer?",
-    );
-    if (!confirmed) return;
+  const handleDeleteConfirm = useCallback(() => {
+    if (!timerId) return;
 
     const formData = new FormData();
     formData.append("intent", "delete");
@@ -188,6 +191,10 @@ export function TimerForm({
     document.body.appendChild(form);
     form.submit();
   }, [timerId]);
+
+  const handleDeleteCancel = useCallback(() => {
+    setShowDeleteModal(false);
+  }, []);
 
   const renderTabContent = () => {
     switch (selectedTab) {
@@ -267,7 +274,7 @@ export function TimerForm({
           content: "Delete timer",
           loading: isSaving,
           destructive: true,
-          onAction: handleDelete,
+          onAction: handleDeleteClick,
         },
       ]
     : undefined;
@@ -326,6 +333,31 @@ export function TimerForm({
             </Tabs>
           </Box>
         </form>
+        <Modal
+          open={showDeleteModal}
+          onClose={handleDeleteCancel}
+          title="Delete timer"
+          primaryAction={{
+            content: "Delete",
+            destructive: true,
+            onAction: handleDeleteConfirm,
+          }}
+          secondaryActions={[
+            {
+              content: "Cancel",
+              onAction: handleDeleteCancel,
+            },
+          ]}
+        >
+          <Modal.Section>
+            <BlockStack gap="400">
+              <Text as="p" variant="bodyMd">
+                Are you sure you want to delete this timer? This action cannot
+                be undone.
+              </Text>
+            </BlockStack>
+          </Modal.Section>
+        </Modal>
       </Page>
     </Frame>
   );
