@@ -105,9 +105,12 @@ export function validateEndDate(endDate: Date | null): ValidationResult {
  * @param minutes - Minutes to validate
  * @returns Validation result
  */
-export function validateFixedMinutes(minutes: string | number): ValidationResult {
+export function validateFixedMinutes(
+  minutes: string | number,
+): ValidationResult {
   const errors: ValidationError[] = [];
-  const minutesNum = typeof minutes === "string" ? parseInt(minutes, 10) : minutes;
+  const minutesNum =
+    typeof minutes === "string" ? parseInt(minutes, 10) : minutes;
 
   if (isNaN(minutesNum)) {
     errors.push({
@@ -165,7 +168,8 @@ export function validateButtonLink(url: string): ValidationResult {
     if (!urlPattern.test(url)) {
       errors.push({
         field: "buttonLink",
-        message: "Button link must be a valid URL (starting with http:// or https://) or a relative path (starting with /)",
+        message:
+          "Button link must be a valid URL (starting with http:// or https://) or a relative path (starting with /)",
       });
     }
   } catch (e) {
@@ -230,7 +234,9 @@ export function validateMinute(minute: string): ValidationResult {
  * @param formData - Timer form data to validate
  * @returns Validation result with all errors
  */
-export function validateTimerForm(formData: Partial<TimerFormData>): ValidationResult {
+export function validateTimerForm(
+  formData: Partial<TimerFormData>,
+): ValidationResult {
   const allErrors: ValidationError[] = [];
 
   // Validate timer name
@@ -248,12 +254,14 @@ export function validateTimerForm(formData: Partial<TimerFormData>): ValidationR
   // Validate timer type specific fields
   if (formData.timerType === "countdown") {
     const endDateValidation = validateEndDate(
-      formData.endDate ? new Date(formData.endDate) : null
+      formData.endDate ? new Date(formData.endDate) : null,
     );
     allErrors.push(...endDateValidation.errors);
   } else if (formData.timerType === "fixed") {
     if (formData.fixedMinutes !== undefined && formData.fixedMinutes !== null) {
-      const fixedMinutesValidation = validateFixedMinutes(formData.fixedMinutes);
+      const fixedMinutesValidation = validateFixedMinutes(
+        formData.fixedMinutes,
+      );
       allErrors.push(...fixedMinutesValidation.errors);
     }
   }

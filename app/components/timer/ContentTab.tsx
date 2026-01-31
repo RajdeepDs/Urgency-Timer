@@ -19,6 +19,7 @@ import type {
   CallToActionType,
 } from "../../types/timer";
 import { useDateTimePicker } from "../../hooks/useDateTimePicker";
+import type { ValidationError } from "../../utils/timer/validation";
 
 interface ContentTabProps {
   timerType: "product-page" | "top-bottom-bar";
@@ -71,6 +72,7 @@ interface ContentTabProps {
   buttonLink?: string;
   setButtonLink?: (value: string) => void;
 
+  validationErrors: ValidationError[];
   onContinue: () => void;
 }
 
@@ -112,6 +114,7 @@ export default function ContentTab({
   setButtonText,
   buttonLink,
   setButtonLink,
+  validationErrors,
   onContinue,
 }: ContentTabProps) {
   // Use custom hook for date picker state
@@ -135,6 +138,17 @@ export default function ContentTab({
     );
   };
 
+  // Helper function to get error message for a field
+  const getFieldError = (fieldName: string): string | undefined => {
+    const error = validationErrors.find((err) => err.field === fieldName);
+    return error?.message;
+  };
+
+  // Helper function to check if a field has an error
+  const hasFieldError = (fieldName: string): boolean => {
+    return validationErrors.some((err) => err.field === fieldName);
+  };
+
   return (
     <FormLayout>
       <s-text-field
@@ -145,6 +159,9 @@ export default function ContentTab({
         placeholder="Timer name"
         autocomplete="off"
         details="Only visible to you. For your own internal reference."
+        error={
+          hasFieldError("timerName") ? getFieldError("timerName") : undefined
+        }
       />
       <s-text-field
         label="Title"
@@ -153,6 +170,7 @@ export default function ContentTab({
         onInput={(e) => setTitle(getValue(e))}
         placeholder="Hurry up!"
         autocomplete="off"
+        error={hasFieldError("title") ? getFieldError("title") : undefined}
       />
       <s-text-field
         label="Subheading"
@@ -183,6 +201,11 @@ export default function ContentTab({
               onInput={(e) => setButtonText(getValue(e))}
               placeholder="Shop now!"
               autocomplete="off"
+              error={
+                hasFieldError("buttonText")
+                  ? getFieldError("buttonText")
+                  : undefined
+              }
             />
           )}
           {buttonLink !== undefined && setButtonLink && (
@@ -193,6 +216,11 @@ export default function ContentTab({
               value={buttonLink}
               defaultValue={buttonLink}
               onInput={(e) => setButtonLink(getValue(e))}
+              error={
+                hasFieldError("buttonLink")
+                  ? getFieldError("buttonLink")
+                  : undefined
+              }
             />
           )}
         </BlockStack>
@@ -272,6 +300,11 @@ export default function ContentTab({
               onInput={(e) => setFixedMinutes(getValue(e))}
               autocomplete="off"
               details="Enter the number of minutes for the countdown (1-1440)"
+              error={
+                hasFieldError("fixedMinutes")
+                  ? getFieldError("fixedMinuted")
+                  : undefined
+              }
             />
           )}
 
@@ -313,6 +346,11 @@ export default function ContentTab({
                     value={formatDate(selectedDates.start)}
                     onFocus={togglePopoverActive}
                     autoComplete="off"
+                    error={
+                      hasFieldError("endDate")
+                        ? getFieldError("endDate")
+                        : undefined
+                    }
                   />
                 }
                 onClose={togglePopoverActive}

@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Page,
   Box,
@@ -16,7 +16,10 @@ import DesignTab from "./DesignTab";
 import PlacementTab from "./PlacementTab";
 import TimerPreview from "./TimerPreview";
 import { combineDateTime } from "../../utils/timer/datetime";
-import { validateTimerForm } from "../../utils/timer/validation";
+import {
+  validateTimerForm,
+  type ValidationError,
+} from "../../utils/timer/validation";
 import type { Timer, TimerFormData } from "../../types/timer";
 import { tabs } from "app/config/timer-tabs";
 
@@ -55,6 +58,9 @@ export function TimerForm({
 
   const formState = useTimerForm({ existingTimer, timerType });
   const { selectedTab, handleTabChange, goToNextTab } = useTimerTabs();
+  const [validationErrors, setValidationErrors] = useState<ValidationError[]>(
+    [],
+  );
 
   const handleSubmit = useCallback(
     async (publish: boolean = false) => {
@@ -118,10 +124,14 @@ export function TimerForm({
       // Validate form
       const validation = validateTimerForm(timerData);
       if (!validation.isValid) {
-        console.error("Validation errors:", validation.errors);
-        // TODO: Show validation errors to user
+        setValidationErrors(validation.errors);
+        // Switch to Content tab if there are errors
+        handleTabChange(0);
         return;
       }
+
+      // Clear validation errors if form is valid
+      setValidationErrors([]);
 
       const formData = new FormData();
       formData.append("timerData", JSON.stringify(timerData));
@@ -135,7 +145,7 @@ export function TimerForm({
         action: timerId ? `/timer?id=${timerId}` : "/timer",
       });
     },
-    [formState, timerType, timerId, submit],
+    [formState, timerType, timerId, submit, handleTabChange],
   );
 
   const handlePublish = useCallback(() => {
@@ -221,6 +231,7 @@ export function TimerForm({
             setButtonText={formState.setButtonText}
             buttonLink={formState.buttonLink}
             setButtonLink={formState.setButtonLink}
+            validationErrors={validationErrors}
             onContinue={goToNextTab}
           />
         );
