@@ -31,12 +31,20 @@ export function useTimerForm({ existingTimer, timerType }: UseTimerFormProps) {
   const [timerStarts, setTimerStarts] = useState<TimerStarts>("now");
 
   // Date & Time
+  const getDefaultEndDate = () => {
+    const date = new Date();
+    date.setHours(date.getHours() + 24);
+    return date;
+  };
+
   const [endDate, setEndDate] = useState<Date>(
-    existingTimer?.endDate ? new Date(existingTimer.endDate) : new Date(),
+    existingTimer?.endDate
+      ? new Date(existingTimer.endDate)
+      : getDefaultEndDate(),
   );
   const date = existingTimer?.endDate
     ? new Date(existingTimer.endDate)
-    : new Date();
+    : getDefaultEndDate();
   const hours = date.getHours();
   const mins = date.getMinutes();
 
@@ -114,7 +122,9 @@ export function useTimerForm({ existingTimer, timerType }: UseTimerFormProps) {
     setSubheading("Sale ends in:");
     setTimerTypeValue("countdown");
     setTimerStarts("now");
-    setEndDate(new Date());
+    const defaultDate = new Date();
+    defaultDate.setHours(defaultDate.getHours() + 24);
+    setEndDate(defaultDate);
     setHour("12");
     setMinute("00");
     setPeriod("AM");
