@@ -58,7 +58,9 @@ export function useDesignState({
 
   // Typography - Title
   const [titleSize, setTitleSize] = useState(
-    String(initialConfig.titleSize || 28),
+    String(
+      initialConfig.titleSize || (timerType === "top-bottom-bar" ? 18 : 28),
+    ),
   );
   const [titleColor, setTitleColor] = useState(
     initialConfig.titleColor || "#212121",
@@ -66,7 +68,10 @@ export function useDesignState({
 
   // Typography - Subheading
   const [subheadingSize, setSubheadingSize] = useState(
-    String(initialConfig.subheadingSize || 16),
+    String(
+      initialConfig.subheadingSize ||
+        (timerType === "top-bottom-bar" ? 14 : 16),
+    ),
   );
   const [subheadingColor, setSubheadingColor] = useState(
     initialConfig.subheadingColor || "#212121",
@@ -74,7 +79,9 @@ export function useDesignState({
 
   // Typography - Timer
   const [timerSize, setTimerSize] = useState(
-    String(initialConfig.timerSize || 40),
+    String(
+      initialConfig.timerSize || (timerType === "top-bottom-bar" ? 22 : 40),
+    ),
   );
   const [timerColor, setTimerColor] = useState(
     initialConfig.timerColor || "#212121",
@@ -82,7 +89,9 @@ export function useDesignState({
 
   // Typography - Legend
   const [legendSize, setLegendSize] = useState(
-    String(initialConfig.legendSize || 14),
+    String(
+      initialConfig.legendSize || (timerType === "top-bottom-bar" ? 10 : 14),
+    ),
   );
   const [legendColor, setLegendColor] = useState(
     initialConfig.legendColor || "#707070",
@@ -99,7 +108,7 @@ export function useDesignState({
     initialConfig.buttonColor || "#ffffff",
   );
   const [buttonBackgroundColor, setButtonBackgroundColor] = useState(
-    initialConfig.buttonBackgroundColor || "#5c6ac4",
+    initialConfig.buttonBackgroundColor || "#202223",
   );
 
   // Update config whenever any value changes
@@ -124,12 +133,13 @@ export function useDesignState({
       titleColor,
       subheadingSize: parseInt(subheadingSize) || 16,
       subheadingColor,
-      timerSize: parseInt(timerSize) || 40,
+      timerSize:
+        parseInt(timerSize) || (timerType === "top-bottom-bar" ? 20 : 40),
       timerColor,
       legendSize: parseInt(legendSize) || 14,
       legendColor,
       // Button
-      buttonFontSize: parseInt(buttonFontSize) || 16,
+      buttonFontSize: parseInt(buttonFontSize) || 14,
       buttonCornerRadius: parseInt(cornerRadius) || 4,
       buttonColor,
       buttonBackgroundColor,
@@ -160,6 +170,7 @@ export function useDesignState({
     buttonColor,
     buttonBackgroundColor,
     onConfigChange,
+    timerType,
   ]);
 
   // Helper to handle hex text input

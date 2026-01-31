@@ -4,7 +4,6 @@ import {
   Box,
   Tabs,
   Card,
-  InlineGrid,
   Frame,
   Badge,
   Modal,
@@ -307,7 +306,13 @@ export function TimerForm({
           <Box paddingBlockEnd="800">
             <Tabs tabs={tabs} selected={selectedTab} onSelect={handleTabChange}>
               <Box paddingBlockStart="400">
-                <InlineGrid columns={{ xs: 1, lg: "2fr 3fr" }} gap="3200">
+                <div
+                  style={{
+                    display: "grid",
+                    gap: "1rem",
+                    gridTemplateColumns: "minmax(324px, 1fr) 2fr",
+                  }}
+                >
                   <Box>
                     <Card padding="400">{renderTabContent()}</Card>
                   </Box>
@@ -328,7 +333,7 @@ export function TimerForm({
                       buttonText={formState.buttonText}
                     />
                   </Box>
-                </InlineGrid>
+                </div>
               </Box>
             </Tabs>
           </Box>

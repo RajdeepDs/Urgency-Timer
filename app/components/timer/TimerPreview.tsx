@@ -32,18 +32,18 @@ export default function TimerPreview({
     borderColor = "#d1d5db",
     paddingTop = 30,
     paddingBottom = 30,
-    titleSize = 28,
+    titleSize = timerType === "top-bottom-bar" ? 18 : 28,
     titleColor = "#212121",
-    subheadingSize = 16,
+    subheadingSize = timerType === "top-bottom-bar" ? 14 : 16,
     subheadingColor = "#212121",
-    timerSize = 40,
+    timerSize = timerType === "top-bottom-bar" ? 22 : 40,
     timerColor = "#212121",
-    legendSize = 14,
+    legendSize = timerType === "top-bottom-bar" ? 10 : 14,
     legendColor = "#707070",
     buttonFontSize = 16,
     buttonCornerRadius = 4,
     buttonColor = "#ffffff",
-    buttonBackgroundColor = "#5c6ac4",
+    buttonBackgroundColor = "#202223",
   } = designConfig;
 
   // Simple CSS (inline) for primary styling
@@ -94,13 +94,21 @@ export default function TimerPreview({
   };
 
   if (timerType === "top-bottom-bar") {
+    const barTitleStyle: React.CSSProperties = {
+      fontSize: `${Math.min(titleSize, 18)}px`,
+      color: titleColor,
+      fontWeight: 600,
+      lineHeight: 1.2,
+    };
+
     return (
       <div
         style={{
           ...cardStyle,
-          // Use inline CSS for spacing/box
           paddingLeft: "24px",
           paddingRight: "24px",
+          paddingTop: `${Math.min(paddingTop, 16)}px`,
+          paddingBottom: `${Math.min(paddingBottom, 16)}px`,
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
@@ -108,47 +116,61 @@ export default function TimerPreview({
         }}
         className="select-none"
       >
-        <div style={{ flex: 1 }}>
-          <div style={titleStyle}>{title || "Hurry up!"}</div>
-          <div style={{ ...subheadingStyle, marginTop: "4px" }}>
-            {subheading || "Sale ends in:"}
-          </div>
+        {/* Left side: Title and subheading in one line */}
+        <div style={{ ...barTitleStyle, whiteSpace: "nowrap" }}>
+          {title || "Hurry up!"} {subheading || "Sale ends in:"}
         </div>
-        <div
-          className={cn("flex items-center gap-2 shrink-0")}
-          // layout by Tailwind, content styles inline
-        >
-          <div style={{ textAlign: "center" }}>
-            <div style={timerDigitStyle}>00</div>
-            <div style={{ ...legendStyle, marginTop: "2px" }}>{daysLabel}</div>
-          </div>
-          <div style={timerDigitStyle} className={cn("-translate-y-3.5")}>
-            :
-          </div>
-          <div style={{ textAlign: "center" }}>
-            <div style={timerDigitStyle}>23</div>
-            <div style={{ ...legendStyle, marginTop: "2px" }}>{hoursLabel}</div>
-          </div>
-          <div style={timerDigitStyle} className={cn("-translate-y-3.5")}>
-            :
-          </div>
-          <div style={{ textAlign: "center" }}>
-            <div style={timerDigitStyle}>59</div>
-            <div style={{ ...legendStyle, marginTop: "2px" }}>
-              {minutesLabel}
+
+        {/* Right side: Timer and button */}
+        <div className={cn("flex items-center gap-3 shrink-0")}>
+          {/* Timer - Horizontal layout with colons */}
+          <div className={cn("flex items-start gap-1 shrink-0")}>
+            <div style={{ textAlign: "center" }}>
+              <div style={timerDigitStyle}>00</div>
+              <div style={{ ...legendStyle, marginTop: "2px" }}>
+                {daysLabel}
+              </div>
+            </div>
+            <div style={{ ...timerDigitStyle, lineHeight: `${timerSize}px` }}>
+              :
+            </div>
+            <div style={{ textAlign: "center" }}>
+              <div style={timerDigitStyle}>23</div>
+              <div style={{ ...legendStyle, marginTop: "2px" }}>
+                {hoursLabel}
+              </div>
+            </div>
+            <div style={{ ...timerDigitStyle, lineHeight: `${timerSize}px` }}>
+              :
+            </div>
+            <div style={{ textAlign: "center" }}>
+              <div style={timerDigitStyle}>59</div>
+              <div style={{ ...legendStyle, marginTop: "2px" }}>
+                {minutesLabel}
+              </div>
+            </div>
+            <div style={{ ...timerDigitStyle, lineHeight: `${timerSize}px` }}>
+              :
+            </div>
+            <div style={{ textAlign: "center" }}>
+              <div style={timerDigitStyle}>13</div>
+              <div style={{ ...legendStyle, marginTop: "2px" }}>
+                {secondsLabel}
+              </div>
             </div>
           </div>
-          <div style={timerDigitStyle} className={cn("-translate-y-3.5")}>
-            :
-          </div>
-          <div style={{ textAlign: "center" }}>
-            <div style={timerDigitStyle}>53</div>
-            <div style={{ ...legendStyle, marginTop: "2px" }}>
-              {secondsLabel}
-            </div>
-          </div>
+
+          {/* Button */}
+          <button
+            style={{
+              ...buttonStyle,
+              padding: "8px 16px",
+              fontSize: `${Math.min(buttonFontSize, 14)}px`,
+            }}
+          >
+            {buttonText}
+          </button>
         </div>
-        <button style={buttonStyle}>{buttonText}</button>
       </div>
     );
   }
