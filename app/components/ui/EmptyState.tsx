@@ -1,4 +1,11 @@
-import { BlockStack, Text, Box, Button, Card } from "@shopify/polaris";
+import {
+  BlockStack,
+  Text,
+  Box,
+  Button,
+  Card,
+  InlineStack,
+} from "@shopify/polaris";
 
 interface EmptyStateProps {
   title: string;
@@ -32,9 +39,11 @@ export function EmptyState({
 
         {actionLabel && onAction && (
           <Box paddingBlockStart="400">
-            <Button variant="primary" size="large" onClick={onAction}>
-              {actionLabel}
-            </Button>
+            <InlineStack align="center">
+              <Button variant="primary" size="large" onClick={onAction}>
+                {actionLabel}
+              </Button>
+            </InlineStack>
           </Box>
         )}
       </BlockStack>

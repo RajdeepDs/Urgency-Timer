@@ -270,13 +270,13 @@ export function TimerForm({
           url: "/",
         }}
         titleMetadata={
-          timerId ? <Badge>Published</Badge> : <Badge>Draft</Badge>
+          timerId ? (
+            <Badge tone="success">Published</Badge>
+          ) : (
+            <Badge>Draft</Badge>
+          )
         }
-        subtitle={
-          timerId
-            ? `Timer ID: ${timerId} | Store: ${shop}`
-            : `Save to show Timer ID | Store: ${shop}`
-        }
+        subtitle={timerId ? `Timer ID: ${timerId}` : `Save to show Timer ID`}
         secondaryActions={secondaryActions}
         primaryAction={{
           content: timerId ? "Update" : "Publish",

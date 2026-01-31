@@ -11,6 +11,7 @@ import {
   InlineStack,
   Grid,
   InlineGrid,
+  ProgressBar,
 } from "@shopify/polaris";
 import { TitleBar } from "@shopify/app-bridge-react";
 import { authenticate, registerWebhooks } from "../shopify.server";
@@ -129,6 +130,11 @@ export default function Index() {
     submit(formData, { method: "post" });
   };
 
+  const currentPlanName =
+    shop.currentPlan.charAt(0).toUpperCase() + shop.currentPlan.slice(1);
+  const progressValue =
+    limit === -1 ? 0 : Math.min((shop?.monthlyViews || 0) / limit, 1);
+
   return (
     <Page>
       <TitleBar title="Urgency Timer" />
@@ -155,14 +161,22 @@ export default function Index() {
       </Box>
       <BlockStack gap="200">
         <Card>
-          <Text as="h2" variant="bodyMd">
-            You're currently on{" "}
-            <Text as="span" variant="headingSm">
-              <span className="capitalize">{shop?.currentPlan || "Free"}</span>{" "}
-              Plan.
-            </Text>{" "}
-            ({usageText}). One visitor can have multiple views per session.
-          </Text>
+          <BlockStack gap="200">
+            <Text as="p">
+              You're currently on{" "}
+              <Text as="strong">{currentPlanName} plan.</Text> ({usageText}).
+              One visitor can have multiple views per session.
+            </Text>
+            {shop.viewLimit !== -1 && (
+              <ProgressBar progress={progressValue} size="small" />
+            )}
+            {shop.trialEndsAt && (
+              <Text as="p" tone="success">
+                Trial active until{" "}
+                {new Date(shop.trialEndsAt).toLocaleDateString()}
+              </Text>
+            )}
+          </BlockStack>
         </Card>
 
         {timers.length === 0 ? (
