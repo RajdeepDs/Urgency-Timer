@@ -159,24 +159,32 @@ export default function Index() {
           </Grid.Cell>
         </InlineGrid>
       </Box>
-      <BlockStack gap="200">
+      <BlockStack gap="400">
         <Card>
-          <BlockStack gap="200">
-            <Text as="p">
-              You're currently on{" "}
-              <Text as="strong">{currentPlanName} plan.</Text> ({usageText}).
-              One visitor can have multiple views per session.
-            </Text>
-            {shop.viewLimit !== -1 && (
-              <ProgressBar progress={progressValue} size="small" />
-            )}
-            {shop.trialEndsAt && (
-              <Text as="p" tone="success">
-                Trial active until{" "}
-                {new Date(shop.trialEndsAt).toLocaleDateString()}
-              </Text>
-            )}
-          </BlockStack>
+          <InlineStack gap="400" align="space-between" blockAlign="center">
+            <div style={{ flex: 1 }}>
+              <BlockStack gap="200">
+                <Text as="p">
+                  You're currently on{" "}
+                  <Text as="strong">{currentPlanName} Plan.</Text>{" "}
+                  <Text as="span" tone="subdued">
+                    ({usageText}).
+                  </Text>{" "}
+                  One visitor can have multiple views per session.
+                </Text>
+                {shop.viewLimit !== -1 && (
+                  <ProgressBar progress={progressValue} size="small" />
+                )}
+                {shop.trialEndsAt && (
+                  <Text as="p" tone="success">
+                    Trial active until{" "}
+                    {new Date(shop.trialEndsAt).toLocaleDateString()}
+                  </Text>
+                )}
+              </BlockStack>
+            </div>
+            <Button url="/plans">Upgrade</Button>
+          </InlineStack>
         </Card>
 
         {timers.length === 0 ? (
