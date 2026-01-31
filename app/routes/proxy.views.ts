@@ -4,74 +4,119 @@ import {
   type LoaderFunctionArgs,
 } from "@remix-run/node";
 import prisma from "../db.server";
+import { validateProxyRequest } from "../utils/proxy.server";
 import { incrementShopViews } from "../utils/shop.server";
 
 /**
- * Public endpoint to record timer views from the storefront.
+ * App Proxy endpoint to record timer views from the storefront.
  *
- * Path: /public/views
+ * URL: https://yourstore.myshopify.com/apps/urgency-timer/views
+ *
+ * Shopify will proxy requests to: https://yourapp.com/proxy/views
+ *
+ * Query params automatically added by Shopify:
+ * - shop: shop domain
+ * - signature: HMAC signature for validation
  *
  * Accepts:
- * - Method: POST (JSON)
- * - Body:
+ * - Method: POST (JSON or URL-encoded)
+ * - Body/Params:
  *   {
- *     shop: string;           // required (shop domain)
  *     timerId: string;        // required (Timer.id)
  *     pageUrl?: string;
  *     pageType?: string;      // "product" | "collection" | "home" | "cart" | "page"
  *     productId?: string;
- *     country?: string;       // ISO country code, optional (falls back to headers when present)
+ *     country?: string;       // ISO country code
  *     visitorId?: string;     // Optional client-generated visitor/session id
  *   }
  *
  * Returns:
  *   { success: true, id: string } on success
- *
- * CORS:
- *   - Allows cross-origin calls from storefronts
  */
 
 // Handle GET (not allowed for this endpoint)
 export async function loader({ request }: LoaderFunctionArgs) {
   return json(
     { error: "Method Not Allowed" },
-    { status: 405, headers: corsHeaders() },
+    {
+      status: 405,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    },
   );
 }
 
-// Handle POST / OPTIONS
+// Handle POST
 export async function action({ request }: ActionFunctionArgs) {
-  const headers = corsHeaders();
+  // Validate the app proxy signature
+  const validation = validateProxyRequest(request);
 
-  // CORS preflight
-  if (request.method === "OPTIONS") {
-    return new Response(null, { status: 204, headers });
+  // Development mode: allow requests with shop param even if HMAC fails
+  const isDev = process.env.NODE_ENV !== "production";
+  const url = new URL(request.url);
+  const shopParam = url.searchParams.get("shop");
+
+  if (!validation.isValid && (!isDev || !shopParam)) {
+    return json(
+      { error: validation.error || "Unauthorized" },
+      {
+        status: 401,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      },
+    );
   }
 
+  const shop = validation.shop || shopParam!;
+
   if (request.method !== "POST") {
-    return json({ error: "Method Not Allowed" }, { status: 405, headers });
+    return json(
+      { error: "Method Not Allowed" },
+      {
+        status: 405,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      },
+    );
   }
 
   let payload: any;
+  const contentType = request.headers.get("content-type") || "";
+
   try {
-    payload = await request.json();
+    if (contentType.includes("application/json")) {
+      payload = await request.json();
+    } else {
+      // Handle URL-encoded or form data
+      const formData = await request.formData();
+      payload = Object.fromEntries(formData);
+    }
   } catch {
-    return json({ error: "Invalid JSON body" }, { status: 400, headers });
-  }
-
-  const shop = String(payload?.shop || "").trim();
-  const timerId = String(payload?.timerId || "").trim();
-
-  if (!shop) {
     return json(
-      { error: "Missing required field: shop" },
-      { status: 400, headers },
+      { error: "Invalid request body" },
+      {
+        status: 400,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      },
     );
   }
+
+  const timerId = String(payload?.timerId || "").trim();
+
   if (!timerId) {
     return json(
       { error: "Missing required field: timerId" },
-      { status: 400, headers },
+      {
+        status: 400,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      },
     );
   }
 
@@ -102,7 +147,12 @@ export async function action({ request }: ActionFunctionArgs) {
     if (!timer) {
       return json(
         { error: "Timer not found for this shop" },
-        { status: 404, headers },
+        {
+          status: 404,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
       );
     }
 
@@ -131,23 +181,29 @@ export async function action({ request }: ActionFunctionArgs) {
     // Increment shop monthly views (best-effort)
     await incrementShopViews(shop).catch(() => {});
 
-    return json({ success: true, id: view.id }, { headers });
+    return json(
+      { success: true, id: view.id },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      },
+    );
   } catch (err) {
-    // Avoid leaking server internals
-    return json({ error: "Failed to record view" }, { status: 500, headers });
+    console.error("[proxy.views] Error recording view:", err);
+    return json(
+      { error: "Failed to record view" },
+      {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      },
+    );
   }
 }
 
 /* ---------------------- Utilities ---------------------- */
-
-function corsHeaders() {
-  return {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "POST,OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type",
-    "Content-Type": "application/json; charset=utf-8",
-  };
-}
 
 function safeString(value: unknown, maxLen: number): string | null {
   if (typeof value !== "string") return null;
@@ -171,6 +227,5 @@ function extractIP(request: Request): string | null {
     request.headers.get("fly-client-ip");
   if (alt) return alt;
 
-  // As a last resort, return null (node doesn't expose remoteAddress here)
   return null;
 }

@@ -7,7 +7,7 @@ and fetching published timers from the app proxy endpoint (secured with HMAC).
 Notes:
 - Include assets/urgency-timer.js and assets/urgency-timer.css in your extension assets.
 - Default endpoint: /apps/urgency-timer/timers (Shopify App Proxy - automatically signed)
-- View tracking endpoint: /public/views (public endpoint for analytics)
+- View tracking endpoint: /apps/urgency-timer/views (app proxy endpoint for analytics)
 - You can override endpoints by defining window.URGENCY_TIMER_ENDPOINT and
   window.URGENCY_TIMER_VIEW_ENDPOINT before the script loads.
 - This block exposes data attributes (shop domain, product ID, timer ID) used by the client script.

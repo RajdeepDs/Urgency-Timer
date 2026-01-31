@@ -34,7 +34,7 @@
   };
 
  // change to "/apps/urgency-timer/timers" when deployed to production
-  const DEFAULT_ENDPOINT = "https://arizona-pit-harris-lotus.trycloudflare.com/public/timers";
+  const DEFAULT_ENDPOINT = "https://accomplish-loved-true-win.trycloudflare.com/public/timers";
 
   function log(...args) {
     if (DEBUG) console.log("[UrgencyTimer]", ...args);
@@ -563,7 +563,7 @@
 
   function trackView(ctx, timer) {
     try {
-      const viewEndpoint = window.URGENCY_TIMER_VIEW_ENDPOINT || "/public/views";
+      const viewEndpoint = window.URGENCY_TIMER_VIEW_ENDPOINT || "/apps/urgency-timer/views";
       const payload = JSON.stringify({
         shop: ctx.shop,
         timerId: timer.id,
