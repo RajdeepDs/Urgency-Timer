@@ -384,6 +384,8 @@ export function TimerForm({
                       hour={formState.hour}
                       minute={formState.minute}
                       period={formState.period}
+                      timerTypeValue={formState.timerTypeValue}
+                      fixedMinutes={formState.fixedMinutes}
                     />
                   </Box>
                 </div>

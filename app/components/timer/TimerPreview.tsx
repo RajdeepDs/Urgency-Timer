@@ -16,6 +16,8 @@ interface TimerPreviewProps {
   hour?: string;
   minute?: string;
   period?: "AM" | "PM";
+  timerTypeValue?: "countdown" | "fixed";
+  fixedMinutes?: string;
 }
 
 export default function TimerPreview({
@@ -32,6 +34,8 @@ export default function TimerPreview({
   hour = "12",
   minute = "00",
   period = "AM",
+  timerTypeValue = "countdown",
+  fixedMinutes = "10",
 }: TimerPreviewProps) {
   // Calculate target end date/time
   const getTargetDate = useCallback(() => {
@@ -58,6 +62,23 @@ export default function TimerPreview({
 
   // Calculate time left
   const calculateTimeLeft = useCallback(() => {
+    // For fixed timer type, use fixed minutes
+    if (timerTypeValue === "fixed") {
+      const totalSeconds = parseInt(fixedMinutes) * 60;
+
+      if (totalSeconds <= 0) {
+        return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+      }
+
+      const days = Math.floor(totalSeconds / (60 * 60 * 24));
+      const hours = Math.floor((totalSeconds / (60 * 60)) % 24);
+      const minutes = Math.floor((totalSeconds / 60) % 60);
+      const seconds = totalSeconds % 60;
+
+      return { days, hours, minutes, seconds };
+    }
+
+    // For countdown timer type, calculate from end date
     const target = getTargetDate();
     const now = new Date();
     const difference = target.getTime() - now.getTime();
@@ -72,19 +93,23 @@ export default function TimerPreview({
     const seconds = Math.floor((difference / 1000) % 60);
 
     return { days, hours, minutes, seconds };
-  }, [getTargetDate]);
+  }, [getTargetDate, timerTypeValue, fixedMinutes]);
 
   // Live countdown timer state
   const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
 
-  // Update timer every second
+  // Update timer every second (only for countdown, fixed timer is static in preview)
   useEffect(() => {
-    const interval = setInterval(() => {
-      setTimeLeft(calculateTimeLeft());
-    }, 1000);
+    if (timerTypeValue === "countdown") {
+      const interval = setInterval(() => {
+        setTimeLeft(calculateTimeLeft());
+      }, 1000);
 
-    return () => clearInterval(interval);
-  }, [calculateTimeLeft]);
+      return () => clearInterval(interval);
+    }
+    // For fixed timer, just set it once
+    setTimeLeft(calculateTimeLeft());
+  }, [calculateTimeLeft, timerTypeValue]);
 
   // Format numbers to always be 2 digits
   const formatTime = (num: number) => String(num).padStart(2, "0");

@@ -302,7 +302,7 @@ export default function ContentTab({
               details="Enter the number of minutes for the countdown (1-1440)"
               error={
                 hasFieldError("fixedMinutes")
-                  ? getFieldError("fixedMinuted")
+                  ? getFieldError("fixedMinutes")
                   : undefined
               }
             />
