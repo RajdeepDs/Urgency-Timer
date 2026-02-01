@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "3e121cdbd42c341879c18784b948d955"
-name = "urgency-timer"
+name = "Urgency Timer"
 application_url = "https://replies-airport-aerospace-searching.trycloudflare.com"
 embedded = true
 
