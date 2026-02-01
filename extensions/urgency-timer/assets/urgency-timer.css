@@ -185,7 +185,7 @@
   gap: 10px;
   background: #f9fafb;
   color: var(--utimer-fg);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border-bottom: 1px solid #e5e7eb;
   flex-wrap: nowrap;
 }
 

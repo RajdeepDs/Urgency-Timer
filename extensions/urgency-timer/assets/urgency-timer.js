@@ -180,18 +180,6 @@
     countdown.append(numbersRow, labelsRow);
 
     const dc = timer.designConfig || {};
-    if (dc.timerSize) {
-      numbersRow.querySelectorAll(".utimer-number").forEach(e => (e.style.fontSize = dc.timerSize + "px"));
-      numbersRow.querySelectorAll(".utimer-separator").forEach(e => (e.style.fontSize = dc.timerSize + "px"));
-    }
-    if (dc.timerColor) {
-      numbersRow.querySelectorAll(".utimer-number").forEach(e => (e.style.color = dc.timerColor));
-      numbersRow.querySelectorAll(".utimer-separator").forEach(e => (e.style.color = dc.timerColor));
-    }
-    if (dc.legendSize)
-      labelsRow.querySelectorAll(".utimer-label").forEach(e => (e.style.fontSize = dc.legendSize + "px"));
-    if (dc.legendColor)
-      labelsRow.querySelectorAll(".utimer-label").forEach(e => (e.style.color = dc.legendColor));
 
     c.append(title);
     if (timer.subheading) c.append(sub);
@@ -199,12 +187,80 @@
 
     const hasExplicitButton = timer.ctaType === "button" && timer.buttonLink;
     const isBarWithButton = timer.type === "top-bottom-bar" && timer.ctaType !== "none";
+    let buttonEl = null;
     if (hasExplicitButton || isBarWithButton) {
       const ctaWrap = el("div", "utimer-cta", "");
       const a = el("a", "utimer-button", timer.buttonText || "Shop now!");
       a.href = timer.buttonLink || "/";
+      buttonEl = a;
       ctaWrap.appendChild(a);
       c.append(ctaWrap);
+    }
+
+    /* ========== Sync designConfig with storefront ========== */
+    const isBar = timer.type === "top-bottom-bar";
+    if (!isBar) {
+      if (dc.backgroundColor != null || (dc.backgroundType === "gradient" && dc.gradientStartColor && dc.gradientEndColor)) {
+        if (dc.backgroundType === "gradient" && dc.gradientStartColor && dc.gradientEndColor) {
+          c.style.background = "linear-gradient(135deg, " + dc.gradientStartColor + ", " + dc.gradientEndColor + ")";
+        } else {
+          c.style.backgroundColor = dc.backgroundColor || "";
+        }
+      }
+      if (dc.borderRadius != null) c.style.borderRadius = dc.borderRadius + "px";
+      if (dc.borderSize != null && dc.borderSize > 0 && dc.borderColor) {
+        c.style.border = dc.borderSize + "px solid " + dc.borderColor;
+      }
+      if (dc.paddingTop != null) c.style.paddingTop = dc.paddingTop + "px";
+      if (dc.paddingBottom != null) c.style.paddingBottom = dc.paddingBottom + "px";
+      if (dc.marginTop != null) c.style.marginTop = dc.marginTop + "px";
+      if (dc.marginBottom != null) c.style.marginBottom = dc.marginBottom + "px";
+    }
+
+    if (dc.titleSize != null) title.style.fontSize = dc.titleSize + "px";
+    if (dc.titleColor) title.style.color = dc.titleColor;
+    if (dc.titleFontWeight) title.style.fontWeight = dc.titleFontWeight;
+    if (dc.titleFontFamily) title.style.fontFamily = dc.titleFontFamily;
+
+    if (dc.subheadingSize != null) sub.style.fontSize = dc.subheadingSize + "px";
+    if (dc.subheadingColor) sub.style.color = dc.subheadingColor;
+    if (dc.subheadingFontWeight) sub.style.fontWeight = dc.subheadingFontWeight;
+    if (dc.subheadingFontFamily) sub.style.fontFamily = dc.subheadingFontFamily;
+
+    if (dc.timerSize != null) {
+      numbersRow.querySelectorAll(".utimer-number").forEach(e => (e.style.fontSize = dc.timerSize + "px"));
+      numbersRow.querySelectorAll(".utimer-separator").forEach(e => (e.style.fontSize = dc.timerSize + "px"));
+    }
+    if (dc.timerColor) {
+      numbersRow.querySelectorAll(".utimer-number").forEach(e => (e.style.color = dc.timerColor));
+      numbersRow.querySelectorAll(".utimer-separator").forEach(e => (e.style.color = dc.timerColor));
+    }
+    if (dc.timerFontWeight) {
+      numbersRow.querySelectorAll(".utimer-number").forEach(e => (e.style.fontWeight = dc.timerFontWeight));
+      numbersRow.querySelectorAll(".utimer-separator").forEach(e => (e.style.fontWeight = dc.timerFontWeight));
+    }
+    if (dc.timerFontFamily) {
+      numbersRow.querySelectorAll(".utimer-number").forEach(e => (e.style.fontFamily = dc.timerFontFamily));
+      numbersRow.querySelectorAll(".utimer-separator").forEach(e => (e.style.fontFamily = dc.timerFontFamily));
+    }
+
+    if (dc.legendSize != null)
+      labelsRow.querySelectorAll(".utimer-label").forEach(e => (e.style.fontSize = dc.legendSize + "px"));
+    if (dc.legendColor)
+      labelsRow.querySelectorAll(".utimer-label").forEach(e => (e.style.color = dc.legendColor));
+    if (dc.legendFontWeight)
+      labelsRow.querySelectorAll(".utimer-label").forEach(e => (e.style.fontWeight = dc.legendFontWeight));
+    if (dc.legendFontFamily)
+      labelsRow.querySelectorAll(".utimer-label").forEach(e => (e.style.fontFamily = dc.legendFontFamily));
+
+    if (buttonEl) {
+      if (dc.buttonFontSize != null) buttonEl.style.fontSize = dc.buttonFontSize + "px";
+      if (dc.buttonCornerRadius != null) buttonEl.style.borderRadius = dc.buttonCornerRadius + "px";
+      if (dc.buttonColor) buttonEl.style.color = dc.buttonColor;
+      if (dc.buttonBackgroundColor) buttonEl.style.backgroundColor = dc.buttonBackgroundColor;
+      if (dc.buttonBorderColor && dc.buttonBorderSize != null && dc.buttonBorderSize > 0) {
+        buttonEl.style.border = dc.buttonBorderSize + "px solid " + dc.buttonBorderColor;
+      }
     }
 
     let id = setInterval(update, 1000);
@@ -254,6 +310,15 @@
         const bar = document.createElement("div");
         const isTop = t.designConfig?.positioning !== "bottom";
         bar.className = "utimer-bar " + (isTop ? "top" : "bottom");
+
+        const dc = t.designConfig || {};
+        if (dc.backgroundType === "gradient" && dc.gradientStartColor && dc.gradientEndColor) {
+          bar.style.background = "linear-gradient(135deg, " + dc.gradientStartColor + ", " + dc.gradientEndColor + ")";
+        } else if (dc.backgroundColor != null) {
+          bar.style.backgroundColor = dc.backgroundColor;
+        }
+        if (dc.paddingTop != null) bar.style.paddingTop = Math.min(dc.paddingTop, 20) + "px";
+        if (dc.paddingBottom != null) bar.style.paddingBottom = Math.min(dc.paddingBottom, 20) + "px";
 
         bar.appendChild(createCountdownDOM(t));
         if (isTop) {
@@ -378,7 +443,7 @@
         justify-content: center;
         gap: 10px;
         background: #f9fafb;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        border-bottom: 1px solid #e5e7eb;
         flex-wrap: nowrap;
       }
 
