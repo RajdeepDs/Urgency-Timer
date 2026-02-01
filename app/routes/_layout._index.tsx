@@ -85,13 +85,21 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     orderBy: { createdAt: "desc" },
   });
 
-  return Response.json({ shop, timers });
+  return json({ shop, timers });
 };
 
 export default function Index() {
   const navigate = useNavigate();
+
   const submit = useSubmit();
+
   const { shop, timers } = useLoaderData<typeof loader>();
+  const normalizedTimers = timers.map((t: any) => ({
+    ...t,
+    createdAt: new Date(t.createdAt),
+    updatedAt: new Date(t.updatedAt),
+    endDate: t.endDate ? new Date(t.endDate) : null,
+  }));
 
   const planLimits: Record<string, number> = {
     free: 1000,
@@ -197,7 +205,7 @@ export default function Index() {
           />
         ) : (
           <TimerDataTable
-            timers={timers}
+            timers={normalizedTimers}
             onTimerClick={handleTimerClick}
             onDelete={handleDeleteTimer}
             onTogglePublish={handleTogglePublish}
