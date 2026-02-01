@@ -1,8 +1,13 @@
 /*!
- * Urgency Timer – Storefront Styles
- * Matches Admin Preview UI exactly
- * Safe to override via theme CSS
+ * Urgency Timer – Storefront Styles (FINAL)
+ * Product timer: CSS Grid
+ * Top/Bottom bar: Flex
+ * Stable, predictable, Shopify-safe
  */
+
+/* =============================
+   Root Variables
+============================= */
 
 :root {
   --utimer-bg: #ffffff;
@@ -25,7 +30,7 @@
 }
 
 /* =============================
-   Product Timer Container
+   Base Container
 ============================= */
 
 .utimer-container {
@@ -33,10 +38,9 @@
   width: 100%;
   max-width: 720px;
   padding: 32px 24px;
-  border: 0 solid var(--utimer-border);
-  border-radius: var(--utimer-radius);
   background: var(--utimer-bg);
   color: var(--utimer-fg);
+  border-radius: var(--utimer-radius);
   font-family:
     -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, Helvetica,
     Arial, sans-serif;
@@ -50,92 +54,68 @@
 .utimer-title {
   font-size: var(--utimer-title-size);
   font-weight: 700;
-  line-height: 1.2;
   margin: 0;
-  color: var(--utimer-title-color, var(--utimer-fg));
 }
 
 .utimer-sub {
   font-size: var(--utimer-sub-size);
-  margin: 0 0 4px 0;
+  margin: 4px 0 12px;
   color: var(--utimer-sub-fg);
 }
 
-/* =============================
-   Countdown – Grid Layout
-============================= */
+/* ======================================================
+   PRODUCT TIMER (GRID — NO FLEX ANYWHERE)
+====================================================== */
 
-.utimer-countdown {
+.utimer-container:not(.utimer-bar *) .utimer-countdown {
   display: grid;
   grid-template-columns: auto auto auto auto auto auto auto;
   grid-template-rows: auto auto;
-  column-gap: 4px;
+  column-gap: 6px;
   row-gap: 6px;
-  justify-items: center;
-  align-items: start;
-  margin-bottom: 4px;
-  width: fit-content;
-  margin-left: auto;
-  margin-right: auto;
+  justify-content: center;
+  margin: 0 auto;
 }
 
-/* Numbers Grid */
+/* Numbers */
 
-.utimer-numbers-row {
-  display: contents;
-}
-
-.utimer-number {
+.utimer-container:not(.utimer-bar *) .utimer-number {
   grid-row: 1;
   font-size: var(--utimer-number-size);
   font-weight: 700;
-  line-height: 1;
-  font-feature-settings:
-    "tnum" 1,
-    "lnum" 1;
-  font-variant-numeric: tabular-nums lining-nums;
-  -webkit-font-smoothing: antialiased;
-  color: var(--utimer-number-color, var(--utimer-fg));
-  text-align: center;
   min-width: 2ch;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
 }
 
-/* Separator (Colon) */
+/* Colons */
 
-.utimer-separator {
+.utimer-container:not(.utimer-bar *) .utimer-separator {
   grid-row: 1;
   font-size: var(--utimer-number-size);
   font-weight: 700;
-  line-height: 1;
-  color: var(--utimer-number-color, var(--utimer-fg));
-  text-align: center;
-  padding: 0;
 }
 
-/* Labels Grid */
+/* Labels */
 
-.utimer-labels-row {
-  display: contents;
-}
-
-.utimer-label {
+.utimer-container:not(.utimer-bar *) .utimer-label {
   grid-row: 2;
   font-size: var(--utimer-label-size);
   color: var(--utimer-muted);
   text-align: center;
-  min-width: 2ch;
 }
 
-.utimer-label:nth-child(1) {
+/* Explicit label placement (stable) */
+.utimer-label[data-unit="days"] {
   grid-column: 1;
 }
-.utimer-label:nth-child(2) {
+.utimer-label[data-unit="hours"] {
   grid-column: 3;
 }
-.utimer-label:nth-child(3) {
+.utimer-label[data-unit="minutes"] {
   grid-column: 5;
 }
-.utimer-label:nth-child(4) {
+.utimer-label[data-unit="seconds"] {
   grid-column: 7;
 }
 
@@ -156,45 +136,77 @@
   color: var(--utimer-button-fg);
   border-radius: var(--utimer-button-radius);
   text-decoration: none;
-  border: none;
-  cursor: pointer;
-  transition:
-    filter 0.15s ease,
-    transform 0.02s ease;
 }
 
-.utimer-button:hover {
-  filter: brightness(0.95);
-}
-
-.utimer-button:active {
-  transform: translateY(1px);
-}
 /* =============================
-   Responsive
+   TOP / BOTTOM BAR (FINAL)
 ============================= */
 
-@media (max-width: 480px) {
-  .utimer-countdown {
-    column-gap: 3px;
+.utimer-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 2147483000;
+  background: #fff;
+  color: #000000;
+}
+
+.utimer-bar.top {
+  top: 0;
+}
+
+.utimer-bar.bottom {
+  bottom: 0;
+}
+
+.utimer-bar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 12px 20px;
+  white-space: nowrap; /* 🔑 prevents wrapping */
+}
+
+.utimer-bar-text {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.utimer-bar-countdown {
+  font-size: 20px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.utimer-bar-number {
+  display: inline-block;
+  min-width: 2ch;
+  text-align: center;
+}
+
+.utimer-bar-separator {
+  margin: 0 2px;
+}
+
+.utimer-bar-button {
+  background: #111;
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* Mobile: still inline, just smaller */
+@media (max-width: 768px) {
+  .utimer-bar-text {
+    font-size: 14px;
   }
 
-  .utimer-number {
-    font-size: 32px;
-    min-width: 2.5ch;
-  }
-
-  .utimer-separator {
-    font-size: 32px;
-    padding: 0;
-  }
-
-  .utimer-label {
-    font-size: 11px;
-  }
-
-  .utimer-sub {
-    margin-bottom: 12px;
+  .utimer-bar-countdown {
+    font-size: 18px;
   }
 }
 
@@ -205,21 +217,11 @@
 @media (prefers-color-scheme: dark) {
   .utimer-container {
     background: #0b0b0c;
-    border-color: #1f2937;
     color: #e5e7eb;
   }
 
-  .utimer-title {
-    color: #f3f4f6;
-  }
-
-  .utimer-number {
-    color: #f9fafb;
-  }
-
   .utimer-sub,
-  .utimer-label,
-  .utimer-close {
+  .utimer-label {
     color: #9ca3af;
   }
 
