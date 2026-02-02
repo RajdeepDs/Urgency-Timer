@@ -4,40 +4,42 @@
 
 export const BILLING_CONFIG = {
   starter: {
-    amount: 6.99,
+    amount: 4.99,
     currencyCode: "USD",
     interval: "EVERY_30_DAYS",
     trialDays: 7,
   },
   essential: {
-    amount: 9.99,
+    amount: 7.99,
     currencyCode: "USD",
     interval: "EVERY_30_DAYS",
     trialDays: 7,
   },
   professional: {
-    amount: 29.99,
+    amount: 14.99,
     currencyCode: "USD",
     interval: "EVERY_30_DAYS",
     trialDays: 7,
   },
 } as const;
 
+// Annual amounts are derived from current monthly with a 20% discount:
+// annual = round_to_cents(12 * monthly * 0.8)
 export const ANNUAL_BILLING_CONFIG = {
   starter: {
-    amount: 67.08,
+    amount: 47.9, // 4.99 * 12 * 0.8 = 47.904 -> 47.90
     currencyCode: "USD",
     interval: "ANNUAL",
     trialDays: 7,
   },
   essential: {
-    amount: 95.88,
+    amount: 76.7, // 7.99 * 12 * 0.8 = 76.704 -> 76.70
     currencyCode: "USD",
     interval: "ANNUAL",
     trialDays: 7,
   },
   professional: {
-    amount: 287.88,
+    amount: 143.9, // 14.99 * 12 * 0.8 = 143.904 -> 143.90
     currencyCode: "USD",
     interval: "ANNUAL",
     trialDays: 7,

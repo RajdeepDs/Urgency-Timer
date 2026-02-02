@@ -5,7 +5,7 @@ import { getShop } from "./shop.server";
  */
 export const PLAN_LIMITS = {
   free: {
-    monthlyViews: 1000,
+    monthlyViews: 1500,
     features: {
       productTimers: true,
       topBarTimers: true,

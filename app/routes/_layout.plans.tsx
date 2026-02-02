@@ -174,7 +174,7 @@ export default function PricingPlans() {
                 </Text>
                 <InlineStack gap={{ xs: "400" }}>
                   <Text as="span">
-                    Up to <Text as="strong">1000</Text> monthly views
+                    Up to <Text as="strong">1500</Text> monthly views
                   </Text>
                   <InlineStack>
                     <Icon source={CheckIcon} tone="base" />

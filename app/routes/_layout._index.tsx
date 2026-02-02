@@ -102,7 +102,7 @@ export default function Index() {
   }));
 
   const planLimits: Record<string, number> = {
-    free: 1000,
+    free: 1500,
     starter: 10000,
     essential: 50000,
     professional: -1,
