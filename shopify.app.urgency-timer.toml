@@ -9,7 +9,7 @@ embedded = true
 automatically_update_urls_on_dev = true
 
 [webhooks]
-api_version = "2026-04"
+api_version = "2024-07"
 
 [[webhooks.subscriptions]]
 topics = [ "app/uninstalled" ]
@@ -24,16 +24,12 @@ topics = [ "app_subscriptions/update" ]
 uri = "/webhooks/app_subscriptions/update"
 
 [[webhooks.subscriptions]]
-compliance_topics = [ "customers/data_request" ]
-uri = "/webhooks/customers/data_request"
-
-[[webhooks.subscriptions]]
-compliance_topics = [ "customers/redact" ]
-uri = "/webhooks/customers/redact"
-
-[[webhooks.subscriptions]]
-compliance_topics = [ "shop/redact" ]
-uri = "/webhooks/shop/redact"
+compliance_topics = [
+  "customers/data_request",
+  "customers/redact",
+  "shop/redact"
+]
+uri = "/webhooks/compliance"
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
