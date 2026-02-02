@@ -49,24 +49,19 @@ export function validateProxyRequest(request: Request): ProxyValidationResult {
     return { isValid: false, error: "API secret not configured" };
   }
 
-  // Build the message to sign:
-  // All query params EXCEPT "signature", sorted alphabetically
-  const paramsToSign = new URLSearchParams();
+  // Build the message to sign using the raw query string sent by Shopify,
+  // excluding the `signature` param without altering encoding/order.
+  // This avoids mismatches caused by URLSearchParams re-encoding.
+  const rawQuery = url.search.startsWith("?")
+    ? url.search.slice(1)
+    : url.search;
 
-  // Sort params alphabetically (excluding signature)
-  const sortedKeys = Array.from(params.keys())
-    .filter((key) => key !== "signature")
-    .sort();
-
-  for (const key of sortedKeys) {
-    const value = params.get(key);
-    if (value !== null) {
-      paramsToSign.append(key, value);
-    }
-  }
-
-  // Create the query string (without leading ?)
-  const message = paramsToSign.toString();
+  // Remove the signature param in a way that preserves the original encoding/order
+  // Handles cases where signature may be first, middle, or last param.
+  const message = rawQuery
+    .split("&")
+    .filter((pair) => !pair.startsWith("signature="))
+    .join("&");
 
   // Compute HMAC-SHA256 (hex digest to match Shopify app proxy "signature" param)
 
