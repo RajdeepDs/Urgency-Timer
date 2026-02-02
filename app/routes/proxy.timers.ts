@@ -33,12 +33,38 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const shopParam = params.get("shop");
 
   if (!validation.isValid && (!isDev || !shopParam)) {
+    // Detailed logging to diagnose signature mismatches in production
+    const debugUrl = new URL(request.url);
+    const debugSignature = debugUrl.searchParams.get("signature");
+    const debugShop = debugUrl.searchParams.get("shop");
+    const debugTimestamp = debugUrl.searchParams.get("timestamp");
+    const debugPathPrefix = debugUrl.searchParams.get("path_prefix");
+    const envSecret =
+      process.env.SHOPIFY_CLIENT_SECRET ||
+      process.env.SHOPIFY_API_SECRET ||
+      process.env.SHOPIFY_API_SECRET_KEY ||
+      "(missing)";
+    console.error("[proxy.timers] App Proxy validation failed", {
+      error: validation.error,
+      isDev,
+      shopParam,
+      requestUrl: request.url,
+      shop: debugShop,
+      signature: debugSignature,
+      timestamp: debugTimestamp,
+      path_prefix: debugPathPrefix,
+      hasSecret: envSecret !== "(missing)",
+    });
+
     return json(
       { error: validation.error || "Unauthorized" },
+
       {
         status: 401,
+
         headers: {
           "Content-Type": "application/json",
+
           "Cache-Control": "no-store",
         },
       },

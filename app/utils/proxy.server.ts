@@ -38,8 +38,13 @@ export function validateProxyRequest(request: Request): ProxyValidationResult {
     return { isValid: false, error: "Missing shop parameter" };
   }
 
-  // Get API secret from environment
-  const apiSecret = process.env.SHOPIFY_API_SECRET;
+  // Get API secret from environment (support multiple common env var names)
+
+  const apiSecret =
+    process.env.SHOPIFY_CLIENT_SECRET ||
+    process.env.SHOPIFY_API_SECRET ||
+    process.env.SHOPIFY_API_SECRET_KEY;
+
   if (!apiSecret) {
     return { isValid: false, error: "API secret not configured" };
   }
@@ -63,17 +68,26 @@ export function validateProxyRequest(request: Request): ProxyValidationResult {
   // Create the query string (without leading ?)
   const message = paramsToSign.toString();
 
-  // Compute HMAC-SHA256
+  // Compute HMAC-SHA256 (hex digest to match Shopify app proxy "signature" param)
+
   const computed = crypto
+
     .createHmac("sha256", apiSecret)
-    .update(message)
+
+    .update(message, "utf8")
+
     .digest("hex");
 
-  // Compare signatures (timing-safe comparison)
-  const isValid = crypto.timingSafeEqual(
-    Buffer.from(signature),
-    Buffer.from(computed)
-  );
+  // Normalize for comparison
+  const receivedSig = signature.toLowerCase();
+  const computedSig = computed.toLowerCase();
+
+  // timingSafeEqual requires buffers of the same length
+  const recvBuf = Buffer.from(receivedSig, "utf8");
+  const compBuf = Buffer.from(computedSig, "utf8");
+  const isValid =
+    recvBuf.length === compBuf.length &&
+    crypto.timingSafeEqual(recvBuf, compBuf);
 
   if (!isValid) {
     return { isValid: false, error: "Invalid signature" };
