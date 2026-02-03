@@ -18,7 +18,7 @@ import { useCallback } from "react";
 import { plans } from "app/config/plans";
 import type { LoaderFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { useLoaderData, useNavigation } from "@remix-run/react";
+import { useLoaderData, useNavigation, useNavigate } from "@remix-run/react";
 import { authenticate } from "../shopify.server";
 import { getShop } from "../utils/shop.server";
 import { getPlanViewLimit } from "../utils/plan-check.server";
@@ -37,10 +37,11 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     const usagePercent =
       viewLimit === -1 ? 0 : (shop.monthlyViews / viewLimit) * 100;
 
-    // Check if coming back from successful subscription
+    // Check if coming back from successful subscription or if there was an error
     const url = new URL(request.url);
     const successParam = url.searchParams.get("success");
     const planParam = url.searchParams.get("plan");
+    const errorParam = url.searchParams.get("error");
 
     return json({
       shop: {
@@ -54,6 +55,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       },
       subscriptionSuccess: successParam === "true",
       subscribedPlan: planParam,
+      billingError: errorParam,
     });
   } catch (error) {
     console.error("Error loading shop data:", error);
@@ -70,52 +72,26 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       },
       subscriptionSuccess: false,
       subscribedPlan: null,
+      billingError: null,
     });
   }
 };
 
 export default function PricingPlans() {
-  const { shop, subscriptionSuccess, subscribedPlan } =
+  const { shop, subscriptionSuccess, subscribedPlan, billingError } =
     useLoaderData<typeof loader>();
   const navigation = useNavigation();
+  const navigate = useNavigate();
   const isSubscribing = navigation.state === "loading";
 
   const handleSubscribe = useCallback(
     (planId: string) => {
-      try {
-        // Using Shopify's Managed Pricing - redirect to their hosted plan selection page
-        // Extract store handle from shop domain
-        const shopDomain = shop.shopDomain || "";
-
-        if (!shopDomain) {
-          console.error("No shop domain available");
-          alert(
-            "Unable to load billing. Please refresh the page and try again.",
-          );
-          return;
-        }
-
-        const storeHandle = shopDomain.replace(".myshopify.com", "");
-        const appHandle = "urgency-timer-3"; // Your app handle from the URL
-
-        // Shopify's managed pricing URL format
-        const managedPricingUrl = `https://admin.shopify.com/store/${storeHandle}/charges/${appHandle}/pricing_plans`;
-
-        console.log(
-          `🔄 Redirecting to Shopify managed pricing: ${managedPricingUrl}`,
-        );
-        console.log(`Selected plan: ${planId}`);
-
-        // Redirect to Shopify's hosted plan selection page
-        window.location.href = managedPricingUrl;
-      } catch (error) {
-        console.error("Error redirecting to billing:", error);
-        alert(
-          "Unable to start subscription. Please try again or contact support.",
-        );
-      }
+      console.log(`🔄 Redirecting to managed pricing for plan: ${planId}`);
+      // Use dedicated billing route for server-side redirect
+      // Server-side redirects ensure proper iframe breakout
+      navigate(`/api/billing/managed-pricing?plan=${planId}`);
     },
-    [shop.shopDomain],
+    [navigate],
   );
 
   const currentPlanName =
@@ -130,6 +106,23 @@ export default function PricingPlans() {
       }}
       title="Pricing Plans"
     >
+      {billingError && (
+        <Box paddingBlockEnd={{ xs: "400" }}>
+          <Banner
+            title="Billing Error"
+            tone="critical"
+            onDismiss={() => {
+              window.history.replaceState({}, "", "/plans");
+            }}
+          >
+            <p>
+              We couldn't redirect you to the billing page. Please try again or
+              contact support if the issue persists.
+            </p>
+          </Banner>
+        </Box>
+      )}
+
       {subscriptionSuccess && subscribedPlan && (
         <Box paddingBlockEnd={{ xs: "400" }}>
           <Banner
