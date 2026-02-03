@@ -3,32 +3,28 @@ import prisma from "../db.server";
 import { validateProxyRequest } from "../utils/proxy.server";
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  console.log("🔥 PROXY ROUTE HIT — BUILD 2026-02-03");
   const validation = validateProxyRequest(request);
-
-  const isDev = process.env.NODE_ENV !== "production";
   const url = new URL(request.url);
-
-  console.log("🔥 RAW URL FROM SHOPIFY:", request.url);
-  console.log("🔥 RAW QUERY STRING:", url.search);
-
   const params = url.searchParams;
-  const shopParam = params.get("shop");
+  const isDev = process.env.NODE_ENV === "development";
 
-  if (!validation.isValid && (!isDev || !shopParam)) {
-    return json(
-      { error: validation.isValid || "Unauthorized" },
-      {
-        status: 401,
-        headers: {
-          "Content-Type": "application/json",
-          "Cache-Control": "no-store",
-        },
-      },
-    );
+  // Strict Validation Check
+  if (!validation.isValid) {
+    // In Dev, we only bypass if the signature is missing entirely (local testing)
+    // If a signature exists but is WRONG, we always block it.
+    const isLocalTest = isDev && !params.get("signature");
+
+    if (!isLocalTest) {
+      console.error("❌ [Proxy] Unauthorized:", validation.error);
+      return json({ error: "Unauthorized" }, { status: 401 });
+    }
   }
 
-  const shop = validation.shop || shopParam!;
+  const shop = validation.shop || params.get("shop");
+  if (!shop) {
+    return json({ error: "Missing shop parameter" }, { status: 400 });
+  }
+
   const now = new Date();
 
   // Context params
