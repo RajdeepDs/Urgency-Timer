@@ -19,22 +19,23 @@ export function validateProxyRequest(request: Request): ProxyValidationResult {
     return { isValid: false, error: "Missing signature" };
   }
 
-  // 1. Extract and sort keys alphabetically (excluding 'signature')
-  const sortedKeys = Array.from(searchParams.keys())
-    .filter((key) => key !== "signature")
-    .sort();
+  // 1. Shopify only signs these 4 parameters for App Proxy requests
+  const shopifySignedParams = [
+    "logged_in_customer_id",
+    "path_prefix",
+    "shop",
+    "timestamp",
+  ];
 
-  // 2. Construct the message string.
-  // IMPORTANT: For App Proxies, join pairs with NO separator (empty string),
-  // and handle multiple values for the same key by joining with commas.
-  const message = sortedKeys
-    .map((key) => {
-      const value = searchParams.getAll(key).join(",");
-      return `${key}=${value}`;
-    })
-    .join("");
+  // 2. Extract only Shopify-signed parameters and construct message
+  // Sort alphabetically and join with '&'
+  const message = shopifySignedParams
+    .filter((key) => searchParams.has(key))
+    .sort()
+    .map((key) => `${key}=${searchParams.get(key) || ""}`)
+    .join("&");
 
-  console.log("🔥 HMAC MESSAGE (JOINED WITH EMPTY STRING):", message);
+  console.log("🔥 HMAC MESSAGE:", message);
 
   const secret = process.env.SHOPIFY_API_SECRET;
   if (!secret) {
