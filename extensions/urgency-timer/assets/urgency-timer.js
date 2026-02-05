@@ -11,10 +11,12 @@
     fetched: false,
     timers: [],
     fetchPromise: null,
+    trackedTimers: new Set(), // Track which timers have already been viewed
   };
 
   // App Proxy path: Shopify proxies to your app (works on any merchant store)
   const DEFAULT_ENDPOINT = "/apps/urgency-timer/timers";
+  const DEFAULT_VIEW_ENDPOINT = "/apps/urgency-timer/views";
 
   function log(...args) {
     if (DEBUG) console.log("[UrgencyTimer]", ...args);
@@ -27,6 +29,20 @@
 
   function getEndpoint() {
     return window.URGENCY_TIMER_ENDPOINT || DEFAULT_ENDPOINT;
+  }
+
+  function getViewEndpoint() {
+    return window.URGENCY_TIMER_VIEW_ENDPOINT || DEFAULT_VIEW_ENDPOINT;
+  }
+
+  function getOrCreateVisitorId() {
+    const key = "utimer_visitor_id";
+    let id = localStorage.getItem(key);
+    if (!id) {
+      id = "v_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9);
+      localStorage.setItem(key, id);
+    }
+    return id;
   }
 
   function getCountry() {
@@ -104,6 +120,49 @@
       });
 
     return STATE.fetchPromise;
+  }
+
+  /* ================= View Tracking ================= */
+
+  function trackTimerView(timer, ctx) {
+    // Only track once per timer per page load
+    if (STATE.trackedTimers.has(timer.id)) {
+      log("View already tracked for timer:", timer.id);
+      return;
+    }
+
+    STATE.trackedTimers.add(timer.id);
+
+    const viewData = {
+      timerId: timer.id,
+      pageUrl: ctx.pageUrl,
+      pageType: ctx.pageType,
+      productId: ctx.productId || undefined,
+      country: ctx.country || undefined,
+      visitorId: getOrCreateVisitorId(),
+    };
+
+    const endpoint = getViewEndpoint();
+    log("Tracking view:", endpoint, viewData);
+
+    // Send view tracking request (best-effort, don't wait for response)
+    fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(viewData),
+    })
+      .then(r => {
+        if (r.ok) {
+          log("View tracked successfully for timer:", timer.id);
+        } else {
+          log("View tracking failed with status:", r.status);
+        }
+      })
+      .catch(e => {
+        log("View tracking error:", e);
+      });
   }
 
   /* ================= Countdown Logic ================= */
@@ -299,6 +358,9 @@
       if (!t) return;
       root.innerHTML = "";
       root.appendChild(createCountdownDOM(t));
+
+      // Track view after mounting
+      trackTimerView(t, ctx);
     });
   }
 
@@ -325,6 +387,9 @@
         } else {
           document.body.appendChild(bar);
         }
+
+        // Track view after mounting
+        trackTimerView(t, ctx);
       });
   }
 
