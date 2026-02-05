@@ -7,7 +7,6 @@ import {
   InlineStack,
   Badge,
   Box,
-  Link,
 } from "@shopify/polaris";
 import { CheckIcon } from "@shopify/polaris-icons";
 
@@ -22,6 +21,7 @@ interface PlanCardProps {
   planId: string;
   currentPlan: string;
   isSubscribing: boolean;
+  onSelect: (planId: string) => void;
 }
 
 export default function PlanCard(props: PlanCardProps) {
@@ -36,6 +36,7 @@ export default function PlanCard(props: PlanCardProps) {
     planId,
     currentPlan,
     isSubscribing,
+    onSelect,
   } = props;
 
   const isCurrentPlan = currentPlan === planId;
@@ -102,15 +103,14 @@ export default function PlanCard(props: PlanCardProps) {
                 Downgrade not available
               </Button>
             ) : (
-              <Link
-                url={`/api/billing/managed-pricing?plan=${planId}`}
-                removeUnderline
-                external
+              <Button
+                size="large"
+                variant="primary"
+                loading={isSubscribing}
+                onClick={() => onSelect(planId)} // Trigger the parent's redirect logic
               >
-                <Button size="large" variant="primary" loading={isSubscribing}>
-                  Start FREE 14-day trial
-                </Button>
-              </Link>
+                Start FREE 14-day trial
+              </Button>
             )}
           </BlockStack>
         </div>

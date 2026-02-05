@@ -86,6 +86,34 @@ export default function PricingPlans() {
     shop.currentPlan.charAt(0).toUpperCase() + shop.currentPlan.slice(1);
   const progressValue = shop.viewLimit === -1 ? 0 : shop.usagePercent;
 
+  const handlePlanSelection = (planId: string) => {
+    // 1. More robust handle extraction
+    const storeHandle = shop.shopDomain.replace(".myshopify.com", "");
+    const appHandle = "urgency-timer-3";
+
+    // 2. Determine the correct admin base
+    // Check if we are already on admin.shopify.com or the old ://myshopify.com
+    const isNewAdmin =
+      window.location.ancestorOrigins?.[0]?.includes("admin.shopify.com") ||
+      document.referrer.includes("admin.shopify.com");
+
+    const managedPricingUrl = isNewAdmin
+      ? `https://admin.shopify.com/store/${storeHandle}/charges/${appHandle}/pricing_plans`
+      : `https://${storeHandle}.://myshopify.com/charges/${appHandle}/pricing_plans`;
+
+    // 3. Break out
+    try {
+      if (window.top && window.top !== window) {
+        window.top.location.href = managedPricingUrl;
+      } else {
+        window.location.href = managedPricingUrl;
+      }
+    } catch (e) {
+      // Fallback if cross-origin policy blocks window.top access
+      window.location.assign(managedPricingUrl);
+    }
+  };
+
   return (
     <Page
       backAction={{
@@ -213,6 +241,7 @@ export default function PricingPlans() {
                 planId={plan.id}
                 currentPlan={shop.currentPlan}
                 isSubscribing={isSubscribing}
+                onSelect={() => handlePlanSelection(plan.id)}
               />
             </Layout.Section>
           ))}
