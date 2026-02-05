@@ -87,7 +87,7 @@ export default function DesignTab({
           <s-select
             label="Positioning"
             value={positioning}
-            onChange={(value) => setPositioning(value as any)}
+            onChange={(e) => setPositioning(getValue(e))}
           >
             <s-option value="top">Top page</s-option>
             <s-option value="bottom">Bottom page</s-option>
